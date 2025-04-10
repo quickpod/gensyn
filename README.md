@@ -35,6 +35,9 @@ Use **Jupyter Lab CUDA 12.6** template on [QuickPod](https://console.quickpod.io
    ```
    ![image](https://github.com/user-attachments/assets/efd2297e-6c32-400a-b5ae-160f80a8e8a0)
 
+> [!NOTE]
+> You can close the browser tab and your node will still run. Just open JupyterLab again next time if you want to check on it
+
 ## Backup Your Identity
 After running successfully, download the `swarm.pem` file for future use:
 1. Right-click on the `swarm.pem` file

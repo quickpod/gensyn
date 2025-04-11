@@ -1,5 +1,8 @@
 # Quick Start Guide for Gensyn RL-Swarm
 
+> [!WARNING]
+> Right now, this doesn’t connect on-chain. I’m planning to update it with a proper solution in the next few days. Same goal — make it work with the least amount of steps and thinking for the user.
+
 Use **Jupyter Lab CUDA 12.6** template on [QuickPod](https://console.quickpod.io/templates)
 
 ## Creating the Pod

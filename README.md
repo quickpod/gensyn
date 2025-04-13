@@ -82,8 +82,6 @@ Start Gensyn Node:
 
    ![image](https://github.com/user-attachments/assets/731d1dc8-0e94-46b2-b62b-de3d33f19c2f)
 
-If not logged in yet, follow the instructions shown.
-
 ---
 
 ## 6. Login to Gensyn

@@ -13,9 +13,9 @@
    
    ![image](https://github.com/user-attachments/assets/bb3b85bf-9eee-41d3-95a5-40d8fbc95878)
    
-   Set `-p 3000:3000 --shm-size=16G`
+   Set `-p 3000:3000 --shm-size=16g`
    
-   ![image](https://github.com/user-attachments/assets/f0fd684c-8510-45f5-a6b9-e9e34fe65bba)
+   ![msedge_pj4xEsseC9](https://github.com/user-attachments/assets/46b5569c-614b-496b-957d-6ad95f4522a6)
 
 4. Choose a GPU:
    - 3090 / 4090 / 5090 / A5000

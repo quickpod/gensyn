@@ -152,7 +152,7 @@ After everything is working:
 1. Right-click on `swarm.pem`
 2. Select `Download` to save it locally.
    
-![image](https://github.com/user-attachments/assets/700ed311-331d-4cc2-978d-50953279d721)
+![image](https://github.com/user-attachments/assets/03b74e76-0032-41ad-ad68-d054d246a6dc)
 
 ---
 > [!NOTE]

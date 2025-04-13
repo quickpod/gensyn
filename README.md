@@ -1,9 +1,5 @@
 # Quick Start Guide — Gensyn RL-Swarm on QuickPod
 
-> [!NOTE]
-> Fixed `0x0000000000000000000000000000000000000000` EOA issue.  
-> Please follow this updated guide.
-
 ---
 
 ## 1. Create Your Pod

@@ -9,7 +9,7 @@
 ## 1. Create Your Pod
 
 1. Go to [QuickPod Templates](https://console.quickpod.io/templates)
-2. Select `Jupyter Lab CUDA 12.6`, clone it and name it eg. `Gensyn 12.6`
+2. Select `Jupyter Lab CUDA 12.6`, clone it and name anything you like. Example `Gensyn 12.6`
    
    ![image](https://github.com/user-attachments/assets/bb3b85bf-9eee-41d3-95a5-40d8fbc95878)
    

@@ -145,11 +145,6 @@ Make sure your `EOA` has a value:
 
 ---
 
-> [!NOTE]
-> You can close the browser tab. Your node will continue running. Next time, just reconnect to JupyterLab to check status.
-
----
-
 ## 9. Backup Your Identity
 
 > [!WARNING]
@@ -161,5 +156,9 @@ After everything is working:
 2. Select `Download` to save it locally.
    
 ![image](https://github.com/user-attachments/assets/700ed311-331d-4cc2-978d-50953279d721)
+
+---
+> [!NOTE]
+> You can close the browser tab. Your node will continue running. Next time, just reconnect to JupyterLab to check status.
 
 ---

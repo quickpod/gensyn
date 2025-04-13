@@ -72,7 +72,7 @@ Wait for the setup to finish.
 ## 5. Run the Node
 
 > [!NOTE]
-> If you've already logged in to Gensyn via Alchemy before (and have a working `swarm.pem`), steps 6 and 7
+> If you've already logged in to Gensyn via Alchemy before (and have a working `swarm.pem`), this will automatically skip steps 6 and 7
 
 Start Gensyn Node:
 

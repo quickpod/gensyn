@@ -9,7 +9,7 @@
    
    ![image](https://github.com/user-attachments/assets/bb3b85bf-9eee-41d3-95a5-40d8fbc95878)
    
-   Set `-p 3000:3000 --shm-size=16g`
+   Set `-p 3000:3000 --shm-size=16g` then press `Save` below this window
    
    ![msedge_pj4xEsseC9](https://github.com/user-attachments/assets/46b5569c-614b-496b-957d-6ad95f4522a6)
 

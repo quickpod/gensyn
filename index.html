@@ -154,6 +154,27 @@
              margin-bottom: 0; /* No bottom margin on last item in a list */
         }
 
+        .explorer-btn {
+            display: block;
+            width: 100%;
+            margin-top: 1em;
+            padding: 0.6em 1em;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .explorer-btn:hover {
+            background-color: #27ae60;
+        }
+
     </style>
 </head>
 <body>
@@ -187,6 +208,7 @@
                 <dt>Total Trained Models</dt>
                 <dd id="rTotalModels"></dd>
             </dl>
+            <a id="explorerLink" href="#" target="_blank" class="explorer-btn">View on Explorer</a>
         </div>
     </div>
 
@@ -247,6 +269,10 @@
                 $('rRound').textContent = round.toString();
                 $('rStage').textContent = stage.toString();
                 $('rTotalModels').textContent = totalModels.toString();
+
+                // Update explorer link
+                const explorerBaseUrl = "https://gensyn-testnet.explorer.alchemy.com/address/";
+                $('explorerLink').href = `${explorerBaseUrl}${eoaRes[0]}?tab=internal_txns`;
 
                 resultsDiv.style.display = 'block';
 

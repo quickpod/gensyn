@@ -52,40 +52,6 @@ install_node() {
   printf "${GREEN}[✓] Node.js $(node -v) installed and set as default${NC}\n"
 }
 
-# Function to install dependencies (from original gensyn.sh)
-install_dependencies() {
-  printf "\n${BLUE}${BOLD}[2/3] Setting up dependency packages...${NC}\n"
-
-  printf "${YELLOW}Note: Running without sudo privileges. Using alternative installation methods.${NC}\n"
-  printf "${YELLOW}Installing Python dependencies...${NC}\n"
-  
-  if ! command -v pip3 &> /dev/null; then
-    printf "${YELLOW}Warning: pip3 is not installed. Some features may not work properly.${NC}\n"
-  else
-    printf "${YELLOW}Installing essential Python packages...${NC}\n"
-    pip3 install cryptography
-    printf "${GREEN}[✓] Installed cryptography library for identity management${NC}\n"
-
-    printf "${YELLOW}Installing required Python packages with version constraints...${NC}\n"
-    pip3 install "protobuf==5.29.0" "vllm"
-    
-    printf "${GREEN}[✓] Installed protobuf${NC}\n"
-
-    printf "${YELLOW}Installing PyTorch and torchvision with CUDA ${CUDA_VERSION}...${NC}\n"
-    pip3 install torch==2.2.2 torchvision --index-url https://download.pytorch.org/whl/${CUDA_VERSION}
-    printf "${GREEN}[✓] Installed PyTorch 2.2.2 and torchvision with CUDA ${CUDA_VERSION}${NC}\n"
-  fi
-
-  for cmd in curl git python3 python3-pip; do
-    if ! command -v $cmd &> /dev/null; then
-      printf "${YELLOW}Warning: $cmd is not installed. Some features may not work properly.${NC}\n"
-      printf "${YELLOW}Recommendation: Install $cmd using your system's package manager.${NC}\n"
-    fi
-  done
-
-  printf "${GREEN}[✓] Base dependency installation complete${NC}\n"
-}
-
 install_local() {
   printf "\n${BLUE}${BOLD}[3/3] Installing Gensyn RL-Swarm locally...${NC}\n"
 
@@ -282,7 +248,6 @@ EOL
 main() {
   print_logo
   install_node
-  install_dependencies
   install_local
 
   printf "\n${YELLOW}To run RL-Swarm with modal login:${NC}\n"

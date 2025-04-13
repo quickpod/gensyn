@@ -60,7 +60,8 @@ curl -s https://quickpod.github.io/gensyn/init.sh | bash
 
 Wait for the setup to finish.
 
-   ![image](https://github.com/user-attachments/assets/8c4b9224-c5a6-4924-a132-00c9e57e45c2)
+   ![image](https://github.com/user-attachments/assets/33baf4d5-ea54-4ca4-9d33-1e625357d2d8)
+
 
 ---
 
@@ -89,9 +90,8 @@ If not logged in yet, follow the instructions shown.
    ![image](https://github.com/user-attachments/assets/5daed881-18c7-475d-b6ed-0261922c2f31)
 
 2. Open it in Chrome or Edge.
-
-Go to:  `chrome://flags/#allow-insecure-localhost`  
-Enable it and restart the browser.
+   Go to:  `chrome://flags/#allow-insecure-localhost`  
+   Enable it and restart the browser.
 
    ![image](https://github.com/user-attachments/assets/4a69e555-8c66-410b-babf-bfb09861ff4c)
 
@@ -106,8 +106,7 @@ Enable it and restart the browser.
 ---
 
 ## 7. Authenticate
-
-Wait until the login screen appears:
+   Wait until the login screen appears:
 
    ![image](https://github.com/user-attachments/assets/01f32c36-21e4-4d3c-9bb3-bbfb23377e58)
 
@@ -129,13 +128,13 @@ Wait until the login screen appears:
 
 ## 8. Verify Node is Running
 
-Back in JupyterLab:
+   Back in JupyterLab:
 
    ![image](https://github.com/user-attachments/assets/c9c4a68a-1dbf-49f3-a0cd-df35b9d87613)
 
 Go to [https://quickpod.github.io/gensyn](https://quickpod.github.io/gensyn)
 
-Enter your Peer Key.
+   Enter your Peer Key.
 
    ![image](https://github.com/user-attachments/assets/3c0308a4-e1f8-422d-8774-db05fdd110a3)
 

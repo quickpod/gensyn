@@ -9,13 +9,17 @@
 ## 1. Create Your Pod
 
 1. Go to [QuickPod Templates](https://console.quickpod.io/templates)
-2. Select `Jupyter Lab CUDA 12.6`
-3. Choose a GPU:
+2. Select `Jupyter Lab CUDA 12.6`, clone it and name it eg. `Gensyn 12.6`
+   ![image](https://github.com/user-attachments/assets/bb3b85bf-9eee-41d3-95a5-40d8fbc95878)
+   Set `-p 3000:3000 --shm-size=16G`
+   ![image](https://github.com/user-attachments/assets/f0fd684c-8510-45f5-a6b9-e9e34fe65bba)
+
+4. Choose a GPU:
    - 3090 / 4090 / 5090 / A5000  
 
    ![image](https://github.com/user-attachments/assets/a86b55ff-f4a9-4cbc-bb45-ea36257b3e98)
 
-4. Click the orange button `Connect to JupyterLab`
+5. Click the orange button `Connect to JupyterLab`
 
    ![image](https://github.com/user-attachments/assets/e797c4c3-f8ec-4b43-8ae2-72b29dc13561)
 

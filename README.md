@@ -16,8 +16,8 @@
 
 4. Choose a GPU:
    - 3090 / 4090 / 5090 / A5000  
-
-   ![image](https://github.com/user-attachments/assets/a86b55ff-f4a9-4cbc-bb45-ea36257b3e98)
+   Choose your the template you created on step 2
+   ![image](https://github.com/user-attachments/assets/31ab3b50-1908-4425-b660-7072eb936b64)
 
 5. Click the orange button `Connect to JupyterLab`
 

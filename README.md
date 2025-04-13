@@ -107,7 +107,7 @@ Start Gensyn Node:
 ---
 
 ## 7. Authenticate
-   Wait until the login screen appears:
+   Wait until the login screen appears. It will take some time, it will be white page or cannot be reached at first. Just keep on trying for 1 to 3 minutes.
 
    ![image](https://github.com/user-attachments/assets/01f32c36-21e4-4d3c-9bb3-bbfb23377e58)
 

@@ -31,8 +31,6 @@
 
 ## 3. Upload Your `swarm.pem` (Optional)
 
-Here's a cleaner and more professional rephrasing:
-
 > [!WARNING]
 > Skip this if you don’t have a `swarm.pem` file.  
 > 

@@ -67,8 +67,9 @@ install_dependencies() {
     printf "${GREEN}[✓] Installed cryptography library for identity management${NC}\n"
 
     printf "${YELLOW}Installing required Python packages with version constraints...${NC}\n"
-    pip3 install "eth-account>=0.8.0,<0.13.0" "web3<7.0.0" "pydantic<2.0" "numpy<2.0" "protobuf>=4.21.0" "hivemind"
-    printf "${GREEN}[✓] Installed eth-account, web3, pydantic, numpy, protobuf, and hivemind with version constraints${NC}\n"
+    pip3 install "protobuf==5.29.0" "vllm"
+    
+    printf "${GREEN}[✓] Installed protobuf${NC}\n"
 
     printf "${YELLOW}Installing PyTorch and torchvision with CUDA ${CUDA_VERSION}...${NC}\n"
     pip3 install torch==2.2.2 torchvision --index-url https://download.pytorch.org/whl/${CUDA_VERSION}
@@ -109,6 +110,22 @@ install_local() {
   fi
 
   printf "${YELLOW}Installing Python dependencies globally...${NC}\n"
+
+  if [ -f "requirements-hivemind.txt" ]; then
+    printf "${YELLOW}Installing Python dependencies from requirements.txt...${NC}\n"
+    pip3 install -r requirements-hivemind.txt
+    printf "${GREEN}[✓] Python dependencies installed globally${NC}\n"
+  else
+    printf "${RED}[✗] requirements.txt not found. Unable to install Python dependencies.${NC}\n"
+  fi
+
+  if [ -f "requirements_gpu.txt" ]; then
+    printf "${YELLOW}Installing Python dependencies from requirements.txt...${NC}\n"
+    pip3 install -r requirements_gpu.txt
+    printf "${GREEN}[✓] Python dependencies installed globally${NC}\n"
+  else
+    printf "${RED}[✗] requirements.txt not found. Unable to install Python dependencies.${NC}\n"
+  fi
 
   if [ -f "requirements.txt" ]; then
     printf "${YELLOW}Installing Python dependencies from requirements.txt...${NC}\n"
@@ -180,6 +197,7 @@ nvm use 18
 
 # Always start modal_login server
 cd modal-login
+pkill -f next-server
 echo "Starting modal-login server on port 3000..."
 npm run dev --legacy-peer-deps > /dev/null 2>&1 &
 SERVER_PID=$!  # Store the process ID

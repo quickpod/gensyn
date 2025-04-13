@@ -147,7 +147,7 @@ Go to [https://quickpod.github.io/gensyn](https://quickpod.github.io/gensyn)
 
 Make sure your `EOA` has a value:
 
-   ![image](https://github.com/user-attachments/assets/b95ec51d-8b2e-41ad-a16a-95c9ca152732)
+   ![image](https://github.com/user-attachments/assets/03b74e76-0032-41ad-ad68-d054d246a6dc)
 
 ---
 
@@ -160,8 +160,8 @@ After everything is working:
 
 1. Right-click on `swarm.pem`
 2. Select `Download` to save it locally.
-   
-![image](https://github.com/user-attachments/assets/03b74e76-0032-41ad-ad68-d054d246a6dc)
+
+![image](https://github.com/user-attachments/assets/8f016d37-980b-4145-8872-4ae9d44db83f)
 
 ---
 > [!NOTE]

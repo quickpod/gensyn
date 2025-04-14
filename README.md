@@ -11,7 +11,8 @@
    
    Set `-p 3000:3000 --shm-size=16g` then press `Save` below this window
    
-   ![msedge_pj4xEsseC9](https://github.com/user-attachments/assets/46b5569c-614b-496b-957d-6ad95f4522a6)
+   ![msedge_uOQO96e36Z](https://github.com/user-attachments/assets/3c9aa89e-33e2-4b92-a92e-d2e15ea09679)
+
 
 4. Choose a GPU:
    - 3090 / 4090 / 5090 / A5000

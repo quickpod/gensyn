@@ -220,7 +220,7 @@ if [ -z "$CONFIG_PATH" ]; then
         CONFIG_PATH="$ROOT/hivemind_exp/configs/gpu/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
     else
         echo "No GPU detected, using CPU configuration"
-        CONFIG_PATH="$ROOT/hivemind_exp/configs/cpu/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
+        CONFIG_PATH="$ROOT/hivemind_exp/configs/mac/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
     fi
 fi
 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gensyn Node Status</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -174,6 +175,12 @@
         .explorer-btn:hover {
             background-color: #27ae60;
         }
+        
+        #rAnimalName {
+            font-weight: 600;
+            color: #27ae60;
+            text-transform: lowercase;
+        }
 
     </style>
 </head>
@@ -189,6 +196,9 @@
         <div id="results">
             <h2>Node Status Card</h2>
             <dl>
+                <dt>Peer Name</dt>
+                <dd id="rAnimalName"></dd>
+                
                 <dt>Peer ID</dt>
                 <dd id="rPeerId"></dd>
 
@@ -213,6 +223,72 @@
     </div>
 
     <script>
+        // Animal name constants based on name_utils.py
+        const ADJECTIVES = [
+            "agile", "alert", "amphibious", "aquatic", "arctic", "armored", "barky", "beaked",
+            "bellowing", "bipedal", "bold", "bristly", "burrowing", "camouflaged", "carnivorous", "chattering",
+            "clawed", "climbing", "coiled", "colorful", "crested", "cunning", "curious", "dappled",
+            "darting", "deadly", "deft", "dense", "dextrous", "diving", "docile", "domestic",
+            "dormant", "downy", "durable", "eager", "elusive", "endangered", "energetic", "enormous",
+            "exotic", "extinct", "fanged", "fast", "feathered", "feline", "ferocious", "fierce",
+            "finicky", "fishy", "flapping", "fleecy", "flexible", "flightless", "fluffy", "foraging",
+            "foxy", "freckled", "frisky", "furry", "galloping", "gentle", "giant", "gilded",
+            "gliding", "graceful", "grassy", "grazing", "gregarious", "grunting", "hairy", "hardy",
+            "hibernating", "hoarse", "horned", "howling", "huge", "hulking", "humming", "hunting",
+            "insectivorous", "invisible", "iridescent", "jagged", "jumping", "keen", "knobby", "lanky",
+            "large", "lazy", "leaping", "leggy", "lethal", "lightfooted", "lithe", "lively",
+            "long", "loud", "lumbering", "majestic", "mammalian", "mangy", "marine", "masked",
+            "meek", "melodic", "mighty", "mimic", "miniature", "moist", "monstrous", "mottled",
+            "muscular", "mute", "nasty", "nimble", "nocturnal", "noisy", "omnivorous", "opaque",
+            "padded", "pale", "patterned", "pawing", "peaceful", "peckish", "pensive", "pesty",
+            "placid", "playful", "plump", "poisonous", "polished", "pouncing", "powerful", "prehistoric",
+            "prickly", "prowling", "pudgy", "purring", "quick", "quiet", "rabid", "raging",
+            "rangy", "rapid", "ravenous", "reclusive", "regal", "reptilian", "restless", "roaring",
+            "robust", "rough", "rugged", "running", "savage", "scaly", "scampering", "scavenging",
+            "scented", "screeching", "scruffy", "scurrying", "secretive", "sedate", "shaggy", "sharp",
+            "shiny", "short", "shrewd", "shy", "silent", "silky", "singing", "sizable",
+            "skilled", "skittish", "sleek", "slender", "slimy", "slithering", "slow", "sly",
+            "small", "smooth", "snappy", "sneaky", "sniffing", "snorting", "soaring", "soft",
+            "solitary", "spotted", "sprightly", "squeaky", "squinting", "stalking", "stealthy", "stinging",
+            "stinky", "stocky", "striped", "strong", "stubby", "sturdy", "subtle", "swift",
+            "tall", "tame", "tangled", "tawny", "tenacious", "territorial", "thick", "thorny",
+            "thriving", "timid", "tiny", "toothy", "tough", "tricky", "tropical", "trotting",
+            "twitchy", "unseen", "untamed", "vicious", "vigilant", "vocal", "voracious", "waddling",
+            "wary", "webbed", "whiskered", "whistling", "wild", "wily", "winged", "wiry",
+            "wise", "woolly", "yapping", "yawning", "zealous"
+        ];
+
+        const ANIMALS = [
+            "aardvark", "albatross", "alligator", "alpaca", "anaconda", "ant", "anteater", "antelope",
+            "ape", "armadillo", "baboon", "badger", "barracuda", "bat", "bear", "beaver",
+            "bee", "bison", "boar", "bobcat", "buffalo", "butterfly", "camel", "capybara",
+            "caribou", "cassowary", "cat", "caterpillar", "cheetah", "chicken", "chameleon", "chimpanzee",
+            "chinchilla", "clam", "cobra", "cockroach", "cod", "condor", "coral", "cougar", "cow",
+            "coyote", "crab", "crane", "crocodile", "crow", "deer", "dingo", "dinosaur",
+            "dog", "dolphin", "donkey", "dove", "dragonfly", "duck", "eagle", "eel",
+            "elephant", "elk", "emu", "falcon", "ferret", "finch", "fish", "flamingo",
+            "flea", "fly", "fox", "frog", "gazelle", "gecko", "gerbil", "gibbon",
+            "giraffe", "goat", "goose", "gorilla", "grasshopper", "grouse", "gull", "hamster",
+            "hare", "hawk", "hedgehog", "heron", "hippo", "hornet", "horse", "hummingbird",
+            "hyena", "ibis", "iguana", "impala", "jackal", "jaguar", "jay", "jellyfish",
+            "kangaroo", "kingfisher", "kiwi", "koala", "komodo", "ladybug", "lemur", "leopard",
+            "lion", "lizard", "llama", "lobster", "locust", "lynx", "macaque", "macaw",
+            "magpie", "mallard", "mammoth", "manatee", "mandrill", "mantis", "marmot", "meerkat",
+            "mink", "mole", "mongoose", "monkey", "moose", "mosquito", "mouse", "mule",
+            "narwhal", "newt", "nightingale", "ocelot", "octopus", "okapi", "opossum", "orangutan", "ostrich",
+            "otter", "owl", "ox", "panda", "panther", "parrot", "peacock", "pelican",
+            "penguin", "pheasant", "pig", "pigeon", "piranha", "platypus", "porcupine", "porpoise",
+            "prawn", "puffin", "puma", "python", "quail", "rabbit", "raccoon",
+            "ram", "rat", "raven", "reindeer", "rhino", "robin", "rooster", "salamander",
+            "salmon", "sandpiper", "sardine", "scorpion", "seahorse", "seal", "sealion",
+            "shark", "sheep", "shrew", "shrimp", "skunk", "sloth", "slug", "snail",
+            "snake", "sparrow", "spider", "squid", "squirrel", "starfish", "stingray", "stork",
+            "swan", "tamarin", "tapir", "tarantula", "termite", "tiger", "toad", "tortoise",
+            "toucan", "trout", "tuna", "turkey", "turtle", "viper", "vulture", "wallaby",
+            "walrus", "warthog", "wasp", "weasel", "whale", "wildebeest", "wolf", "wombat",
+            "woodpecker", "worm", "yak", "zebra"
+        ];
+
         const RPC_URL = "https://gensyn-testnet.g.alchemy.com/public";
         const CONTRACT_ADDRESS = "0x2fC68a233EF9E9509f034DD551FF90A79a0B8F82";
         const ABI = [
@@ -228,6 +304,27 @@
         const checkBtn = $('checkStatus');
         const resultsDiv = $('results');
         const errorDiv = $('error');
+
+        // Function to convert hex string to array of integers
+        const hexToInts = (s, k) => {
+            const result = [];
+            for (let i = 0; i < s.length; i += k) {
+                result.push(parseInt(s.substring(i, i + k), 16));
+            }
+            return result;
+        };
+
+        // Function to get animal name from peer ID
+        const getNameFromPeerId = (peerId) => {
+            const hexDigest = md5(peerId);
+            const ints = hexToInts(hexDigest, 2);
+            
+            const adj1 = ADJECTIVES[ints[2] % ADJECTIVES.length];
+            const adj2 = ADJECTIVES[ints[1] % ADJECTIVES.length];
+            const animal = ANIMALS[ints[0] % ANIMALS.length];
+            
+            return `${adj1} ${adj2} ${animal}`;
+        };
 
         const displayError = (msg) => {
             errorDiv.textContent = `Error: ${msg}`;
@@ -263,6 +360,10 @@
                     contract.uniqueVoters()
                 ]);
 
+                // Generate animal name
+                const animalName = getNameFromPeerId(peerId);
+                
+                $('rAnimalName').textContent = animalName;
                 $('rPeerId').textContent = peerId;
                 $('rEoa').textContent = eoaRes[0];
                 $('rWins').textContent = wins.toString();

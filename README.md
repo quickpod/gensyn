@@ -15,7 +15,7 @@
 
 
 4. Choose a GPU:
-   - 3090 / 4090 / 5090 / A5000
+   - 3090 / 4090 / A5000
      
    Choose your the template you created on step 2
    

@@ -16,6 +16,7 @@
 
 4. Choose a GPU:
    - 3090 / 4090 / A5000
+
    > You can also choose CPU, you can try at least 4 cores
      
    Choose your the template you created on step 2

@@ -122,7 +122,7 @@ Click your **port 3000** link. It will open a new browser tab.
 ## 8. Check Your Node
 
 > [!WARNING]
-> Note you may need to do `step #5` multiple times until you don't get error. of `Daemon failed to start in 15.0 seconds` , gensyn is quite unstable right now. I usually need to try 5 to 10 times on a bad day
+> Note you may need to do `step #5` multiple times until you don't get error. of `Daemon failed to start in 15.0 seconds` , Gensyn is quite unstable right now. I usually need to try 5 to 10 times on a bad day
 
 ![image](https://github.com/user-attachments/assets/d1a53ccc-8875-4691-a2c8-2e93591ec220)
 

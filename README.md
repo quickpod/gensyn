@@ -126,8 +126,7 @@ Click your **port 3000** link. It will open a new browser tab.
 
 ![image](https://github.com/user-attachments/assets/d1a53ccc-8875-4691-a2c8-2e93591ec220)
 
-
-Back in JupyterLab, locate your **ORG ID** and **Peer ID**.
+If running is succesful you will see these, locate your **ORG ID** and **Peer ID** and remember it.
 
 ![image](https://github.com/user-attachments/assets/73251815-5d41-4d5b-b810-9f1892542bdc)
 

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Check if we are in /workspace directory
+if [ "$PWD" != "/workspace" ]; then
+  echo -e "\033[0;31m[✗] Please switch to the /workspace directory before running this script.\033[0m"
+  echo -e "\033[1mType: cd /workspace\033[0m"
+  exit 1
+fi
+
 # Gensyn RL-Swarm node local installation automation script with identity management
 # Extension of the original gensyn.sh script to support identity management with modal login
 
@@ -59,7 +66,15 @@ install_local() {
 
   printf "${YELLOW}Cloning Gensyn RL-Swarm repository...${NC}\n"
   if [ -d "rl-swarm" ]; then
-    printf "${YELLOW}Directory 'rl-swarm' already exists. Skipping clone.${NC}\n"
+    if [ -d "rl-swarm/.git" ]; then
+      printf "${YELLOW}Directory 'rl-swarm' is a git repository. Cleaning and pulling latest changes...${NC}\n"
+      cd rl-swarm
+      git clean -fxd
+      git pull
+      cd ..
+    else
+      printf "${YELLOW}Directory 'rl-swarm' already exists but is not a git repository. Skipping clone.${NC}\n"
+    fi
   else
     git clone https://github.com/gensyn-ai/rl-swarm.git
   fi

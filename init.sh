@@ -299,7 +299,7 @@ echo "Will connect to Testnet: $CONNECT_TO_TESTNET"
 # Load NVM and Node.js v18 or higher
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-nvm use 18
+nvm use 20.18.0
 
 # Always start modal_login server
 cd modal-login

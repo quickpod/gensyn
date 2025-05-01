@@ -58,7 +58,7 @@ In the terminal, paste and run:
 curl -s https://quickpod.github.io/gensyn/init.sh | bash
 ```
 
-![image](https://github.com/user-attachments/assets/80bf41cc-54a8-4106-929a-0b3b1065e355)
+![image](https://github.com/user-attachments/assets/0ff3da71-15d5-4fed-9a0c-20e7e31c0391)
 
 Wait until installation is complete.
 

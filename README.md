@@ -1,167 +1,152 @@
-# Quick Start Guide — Gensyn RL-Swarm on QuickPod
+# 🐝 Quick Start: Gensyn RL-Swarm on QuickPod  
+**Last updated:** May 1, 2025
 
 ---
 
 ## 1. Create Your Pod
 
-1. Go to [QuickPod Templates](https://console.quickpod.io/templates)
-2. Select `Jupyter Lab CUDA 12.6`, clone it and name anything you like. Example `Gensyn 12.6`
-   
+1. Go to [QuickPod Templates](https://console.quickpod.io/templates)  
+2. Find **`Jupyter Lab CUDA 12.6`**, click **Clone**, and name it (e.g., `Gensyn 12.6`)
+
    ![image](https://github.com/user-attachments/assets/bb3b85bf-9eee-41d3-95a5-40d8fbc95878)
-   
-   Set `-p 3000:3000 --shm-size=16g` then press `Save` below this window
-   
+
+3. In the Docker settings, add:
+   ```
+   -p 3000:3000 --shm-size=16g
+   ```
+   Then click **Save**.
+
    ![msedge_uOQO96e36Z](https://github.com/user-attachments/assets/3c9aa89e-33e2-4b92-a92e-d2e15ea09679)
 
+4. Choose a machine:
+   - **CPU:** 16GB+ RAM  
+   - **GPU:** 16GB+ RAM (VRAM can be less or more than 24GB)
 
-4. Choose a GPU:
-   - 3090 / 4090 / A5000
+   Select the template you just created.
 
-   > You can also choose CPU, you can try at least 4 cores
-     
-   Choose your the template you created on step 2
-   
    ![image](https://github.com/user-attachments/assets/31ab3b50-1908-4425-b660-7072eb936b64)
 
-6. Click the orange button `Connect to JupyterLab`
+5. Click the orange **Connect to JupyterLab** button.
 
-   ![image](https://github.com/user-attachments/assets/e797c4c3-f8ec-4b43-8ae2-72b29dc13561)
+   ![image](https://github.com/user-attachments/assets/4748f432-5be1-47e6-8cfb-a9d5aeb4720b)
 
 ---
 
-## 2. Open Terminal
+## 2. Open a Terminal
 
-1. Once inside JupyterLab, click `Terminal` on the left panel.
+Inside JupyterLab, click the **Terminal** icon on the left.
 
-   ![image](https://github.com/user-attachments/assets/d304639d-a46b-4c8a-8263-4e3355c6c867)
+![image](https://github.com/user-attachments/assets/d304639d-a46b-4c8a-8263-4e3355c6c867)
 
 ---
 
 ## 3. Upload Your `swarm.pem` (Optional)
 
 > [!WARNING]
-> Skip this if you don’t have a `swarm.pem` file.  
-> 
-> If you’ve never logged in to Gensyn via Alchemy before, your existing `swarm.pem` (if any) won’t work — just create a new one by following the steps below.  
-> 
-> Otherwise, feel free to reuse your existing `swarm.pem` file.
+> Skip this if you don’t already have a `swarm.pem` file.  If you do, drag and drop it into the file panel.
 
-1. Drag and drop your `swarm.pem` file to the left panel.
-
-   ![image](https://github.com/user-attachments/assets/94a7bae2-72f8-4e8a-8c6c-5c00c8a5e140)
-
-   ![image](https://github.com/user-attachments/assets/77b669a7-5192-4075-8e50-ae109653dc60)
+![image](https://github.com/user-attachments/assets/94a7bae2-72f8-4e8a-8c6c-5c00c8a5e140)  
+![image](https://github.com/user-attachments/assets/77b669a7-5192-4075-8e50-ae109653dc60)
 
 ---
 
 ## 4. Install Gensyn Node
 
-In the terminal, run:
+In the terminal, paste and run:
 
 ```bash
 curl -s https://quickpod.github.io/gensyn/init.sh | bash
 ```
 
-   ![image](https://github.com/user-attachments/assets/80bf41cc-54a8-4106-929a-0b3b1065e355)
+![image](https://github.com/user-attachments/assets/80bf41cc-54a8-4106-929a-0b3b1065e355)
 
-Wait for the setup to finish.
+Wait until installation is complete.
 
-   ![image](https://github.com/user-attachments/assets/33baf4d5-ea54-4ca4-9d33-1e625357d2d8)
-
+![image](https://github.com/user-attachments/assets/c39f44c6-1194-4ba3-bf5d-45fc13b52367)
 
 ---
 
+## 5. Start the Node
 
-## 5. Run the Node
-
-> [!NOTE]
-> If you've already logged in to Gensyn via Alchemy before (and have a working `swarm.pem`), this will automatically skip steps 6 and 7
-
-Start Gensyn Node:
+In the terminal, run:
 
 ```bash
 ./run.sh
 ```
 
-   ![image](https://github.com/user-attachments/assets/731d1dc8-0e94-46b2-b62b-de3d33f19c2f)
+> [!WARNING]
+> When prompted to choose between A or B, just press **Enter** unless you know what to pick. Remember your choice for later.
+
+![image](https://github.com/user-attachments/assets/530afc90-efe3-4f19-9745-352729035c6c)  
+
+Just press Enter unless you know about these options.
+
+![image](https://github.com/user-attachments/assets/32f28377-a814-4b91-befc-8192b2e8659b)
+
+If you see a screen like this, continue to Steps 6–7.  
+If not, skip to Step 8.
+
+![image](https://github.com/user-attachments/assets/cf7b3eb8-a4aa-442d-9d2c-2c3bc66e0452)
 
 ---
 
-## 6. Login to Gensyn
+## 6. Open the Login Page
 
-1. Copy the URL of `port 3000` shown in the terminal.
+Click your **port 3000** link. It will open a new browser tab.
 
-   ![image](https://github.com/user-attachments/assets/5daed881-18c7-475d-b6ed-0261922c2f31)
-
-2. Open it in Chrome or Edge.
-   Go to:  `chrome://flags/#allow-insecure-localhost`  
-   Enable it and restart the browser.
-
-   ![image](https://github.com/user-attachments/assets/4a69e555-8c66-410b-babf-bfb09861ff4c)
-
-3. Click `Restart` — it should show below:
-
-   ![image](https://github.com/user-attachments/assets/c5cce846-ebbe-41d5-a165-1dd8563b1be3)
-
-4. Click your `port 3000` link to open the login page.
-
-   ![image](https://github.com/user-attachments/assets/1cfce446-d821-46b6-9e76-d4d0393c6643)
+![image](https://github.com/user-attachments/assets/f6e39f1d-fd4b-4dc5-909d-82c80e597e0c)
 
 ---
 
 ## 7. Authenticate
-   Wait until the login screen appears. It will take some time, it will be white page or cannot be reached at first. Just keep on trying for 1 to 3 minutes.
 
-   ![image](https://github.com/user-attachments/assets/01f32c36-21e4-4d3c-9bb3-bbfb23377e58)
+> [!NOTE]
+>  It may take 1–3 minutes. Refresh if you see a blank or unreachable page.
 
-1. Enter your email (Do not use Google/Facebook/Passkey)
+1. Enter your email address  
+   ![image](https://github.com/user-attachments/assets/f43ef0c7-a743-4dd3-822d-ab172598e460)
 
-   ![image](https://github.com/user-attachments/assets/223a12e2-96b7-406e-9e7a-512de7a1a169)
-
-2. Enter the token sent to your email.
-
-   ![image](https://github.com/user-attachments/assets/201b4424-9f74-4c9a-820f-5894aee9a579)
-
+2. Enter the token sent to your inbox  
+   ![image](https://github.com/user-attachments/assets/201b4424-9f74-4c9a-820f-5894aee9a579)  
    ![image](https://github.com/user-attachments/assets/b32e9b6d-3dfe-472d-9787-639fec3f88c9)
 
-3. You should see `Login Success`.
+3. You should see **Login Success**
 
    ![image](https://github.com/user-attachments/assets/52e7ef0f-7ef0-4ae4-9763-89470159bf8a)
 
 ---
 
-## 8. Verify Node is Running
+## 8. Check Your Node
 
-   Back in JupyterLab:
+Back in JupyterLab, locate your **ORG ID** and **Peer ID**.
 
-   ![image](https://github.com/user-attachments/assets/c9c4a68a-1dbf-49f3-a0cd-df35b9d87613)
+![image](https://github.com/user-attachments/assets/73251815-5d41-4d5b-b810-9f1892542bdc)
 
-Go to [https://quickpod.github.io/gensyn](https://quickpod.github.io/gensyn)
+Go to: [https://quickpod.github.io/gensyn](https://quickpod.github.io/gensyn)  
+Paste your **Peer ID**, and select **A or B** (based on Step 5).
 
-   Enter your Peer Key.
+> [!NOTE]
+> Gensyn now uses a new swarm system (A/B). Old swarms are deprecated. New swarms will show 0 wins at start
 
-   ![image](https://github.com/user-attachments/assets/3c0308a4-e1f8-422d-8774-db05fdd110a3)
+![image](https://github.com/user-attachments/assets/2569b712-0304-4833-8a0c-8af11ac6b7e8)
 
-Make sure your `EOA` has a value:
+Example of old swarm (not recommended anymore):
 
-   ![image](https://github.com/user-attachments/assets/03b74e76-0032-41ad-ad68-d054d246a6dc)
+![image](https://github.com/user-attachments/assets/742ecf75-3586-4680-bcb2-b379825dc25a)
 
 ---
 
 ## 9. Backup Your Identity
 
 > [!WARNING]
-> Do not forget to backup your `swarm.pem` else you will be unable to connect to the swarm using the same identity.
+> Save `swarm.pem` locally to reconnect later with the same identity.
 
-After everything is working:
-
-1. Right-click on `swarm.pem`
-2. Select `Download` to save it locally.
+1. Right-click `swarm.pem`  
+2. Click **Download**
 
 ![image](https://github.com/user-attachments/assets/8f016d37-980b-4145-8872-4ae9d44db83f)
 
 ---
 > [!NOTE]
-> You can close the browser tab. Your node will continue running. Next time, just reconnect to JupyterLab to check status.
+> Your node will stay running even if you close the browser.  To check on it later, just reconnect to JupyterLab.
 
----

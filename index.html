@@ -63,6 +63,10 @@
             font-size: 0.85em;
         }
 
+        .form-group {
+            margin-bottom: 1.2em;
+        }
+
         input[type="text"] {
             width: 100%;
             padding: 0.7em 0.9em;
@@ -182,13 +186,48 @@
             text-transform: lowercase;
         }
 
+        select#contractSelect {
+            width: 100%;
+            padding: 0.7em 0.9em;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.95em;
+            margin-bottom: 0;
+            background-color: #fff;
+            color: var(--text-color);
+            transition: border-color 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%233498db" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.8em center;
+            background-size: 1.2em;
+        }
+
+        select#contractSelect:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Gensyn Node Status</h1>
-        <label for="peerId">Node Peer ID</label>
-        <input type="text" id="peerId" placeholder="Enter your Peer ID">
+        <div class="form-group">
+            <label for="peerId">Node Peer ID</label>
+            <input type="text" id="peerId" placeholder="Enter your Peer ID">
+        </div>
+        <div class="form-group">
+            <label for="contractSelect">Select Math Contract</label>
+            <select id="contractSelect">
+                <option value="0x69C6e1D608ec64885E7b185d39b04B491a71768C" selected>Math A - Small Swarm</option>
+                <option value="0x6947c6E196a48B77eFa9331EC1E3e45f3Ee5Fd58">Math Hard B - Big Swarm</option>
+                <option value="0x2fC68a233EF9E9509f034DD551FF90A79a0B8F82">Old Swarm</option>
+            </select>
+        </div>
         <button id="checkStatus">Check Status</button>
 
         <div id="error"></div>
@@ -290,7 +329,10 @@
         ];
 
         const RPC_URL = "https://gensyn-testnet.g.alchemy.com/public";
-        const CONTRACT_ADDRESS = "0x2fC68a233EF9E9509f034DD551FF90A79a0B8F82";
+        const CONTRACT_ADDRESSES = {
+            SMALL: "0x69C6e1D608ec64885E7b185d39b04B491a71768C",
+            BIG: "0x6947c6E196a48B77eFa9331EC1E3e45f3Ee5Fd58"
+        };
         const ABI = [
             "function getEoa(string[] peerIds) view returns (address[])",
             "function getTotalWins(string peerId) view returns (uint256)",
@@ -301,6 +343,7 @@
 
         const $ = id => document.getElementById(id);
         const peerInput = $('peerId');
+        const contractSelect = $('contractSelect');
         const checkBtn = $('checkStatus');
         const resultsDiv = $('results');
         const errorDiv = $('error');
@@ -339,8 +382,13 @@
 
         const fetchData = async () => {
             const peerId = peerInput.value.trim();
+            const contractAddress = contractSelect.value;
             if (!peerId) {
                 displayError('Please enter a Peer ID.');
+                return;
+            }
+            if (!contractAddress) {
+                displayError('Please select a Math contract.');
                 return;
             }
 
@@ -350,7 +398,7 @@
 
             try {
                 const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-                const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+                const contract = new ethers.Contract(contractAddress, ABI, provider);
 
                 const [eoaRes, wins, round, stage, totalModels] = await Promise.all([
                     contract.getEoa([peerId]),
@@ -394,6 +442,11 @@
 
         checkBtn.addEventListener('click', fetchData);
         peerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                fetchData();
+            }
+        });
+        contractSelect.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 fetchData();
             }

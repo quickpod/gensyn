@@ -17,17 +17,19 @@ BOLD='\033[1m'
 # Print the logo
 print_logo() {
   printf "${BLUE}${BOLD}"
-  printf '  ██████╗  ███████╗ ███╗   ██╗ ███████╗ ██╗   ██╗ ███╗   ██╗\n'
-  printf ' ██╔════╝  ██╔════╝ ████╗  ██║ ██╔════╝ ╚██╗ ██╔╝ ████╗  ██║\n'
-  printf ' ██║  ███╗ ███████╗ ██╔██╗ ██║ ███████╗  ╚████╔╝  ██╔██╗ ██║\n'
-  printf ' ██║   ██║ ██╔════╝ ██║╚██╗██║ ╚════██║   ╚██╔╝   ██║╚██╗██║\n'
-  printf ' ╚██████╔╝ ███████║ ██║ ╚████║ ███████║    ██║    ██║ ╚████║\n'
-  printf '  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝ ╚══════╝    ╚═╝    ╚═╝  ╚═══╝\n'
+  printf "\n\n"
+  # ASCII Art for RL-SWARM
+  printf '██████╗  ██╗            ███████╗ ██╗    ██╗   █████╗   ██████╗  ███╗   ███╗\n'
+  printf '██╔══██╗ ██║            ██╔════╝ ██║    ██║  ██╔══██╗  ██╔══██╗ ████╗ ████║\n'
+  printf '██████╔╝ ██║      ████  ███████╗ ██║ ██ ██║ ████████║  ██████╔╝ ██╔████╔██║\n'
+  printf '██╔══██╗ ██║            ╚════██║ ██║██████║ ██╔═══██║  ██╔══██╗ ██║╚██╔╝██║\n'
+  printf '██║  ██║ ███████╗       ███████║ ╚███╔███╔╝ ██║   ██║  ██║  ██║ ██║ ╚═╝ ██║\n'
+  printf '╚═╝  ╚═╝ ╚══════╝       ╚══════╝  ╚══╝╚══╝  ╚═╝   ╚═╝  ╚═╝  ╚═╝ ╚═╝     ╚═╝\n'
+  # End of ASCII Art
   printf "${NC}\n\n"
-  printf "${BOLD}RL-Swarm Node Local Installation with Identity Management${NC}\n\n"
 }
 
-# Function to install NVM and Node.js v18.17.0 or higher
+# Function to install NVM and Node.js v20.18.0 or higher
 install_node() {
   printf "\n${BLUE}${BOLD}[1/3] Setting up Node.js environment...${NC}\n"
   
@@ -45,10 +47,10 @@ install_node() {
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   fi
   
-  # Install Node.js v18.17.0 or higher
-  printf "${YELLOW}Installing Node.js v18.17.0 or higher...${NC}\n"
-  nvm install 18
-  nvm use 18
+  # Install Node.js v20.18.0 or higher
+  printf "${YELLOW}Installing Node.js v20.18.0 or higher...${NC}\n"
+  nvm install 20.18.0
+  nvm use 20.18.0
   printf "${GREEN}[✓] Node.js $(node -v) installed and set as default${NC}\n"
 }
 
@@ -75,27 +77,41 @@ install_local() {
     printf "${RED}[✗] Could not find $RUNNER_FILE for patching. Skipping.${NC}\n"
   fi
 
+  # Patch hivemind_grpo_trainer.py to remove only .save_model and .save_pretrained calls
+  printf "${YELLOW}Patching hivemind_grpo_trainer.py to remove .save_model and .save_pretrained calls...${NC}\n"
+  TRAINER_FILE="hivemind_exp/trainer/hivemind_grpo_trainer.py"
+  if [ -f "$TRAINER_FILE" ]; then
+    sed -i '/\.save_model/d' "$TRAINER_FILE"
+    sed -i '/\.save_pretrained/d' "$TRAINER_FILE"
+    printf "${GREEN}[✓] Successfully patched hivemind_grpo_trainer.py to remove .save_model and .save_pretrained calls${NC}\n"
+  else
+    printf "${RED}[✗] Could not find $TRAINER_FILE for patching. Skipping.${NC}\n"
+  fi
+
+  # Patch modal-login/config.ts to allow only email login
+  printf "${YELLOW}Patching modal-login/config.ts to allow only email login...${NC}\n"
+  MODAL_CONFIG_FILE="modal-login/config.ts"
+  if [ -f "$MODAL_CONFIG_FILE" ]; then
+    awk '/const uiConfig: AlchemyAccountsUIConfig = {/{flag=1; print "const uiConfig: AlchemyAccountsUIConfig = {\n  illustrationStyle: \"outline\",\n  auth: {\n    sections: [\n      [{ type: \"email\" }],\n    ],\n    addPasskeyOnSignup: false,\n    //header: <img src=\"logo.png\"/>,\n  },\n};"; next} /};/ && flag{flag=0; next} !flag' "$MODAL_CONFIG_FILE" > "$MODAL_CONFIG_FILE.tmp" && mv "$MODAL_CONFIG_FILE.tmp" "$MODAL_CONFIG_FILE"
+    printf "${GREEN}[✓] Successfully patched modal-login/config.ts to allow only email login${NC}\n"
+  else
+    printf "${RED}[✗] Could not find $MODAL_CONFIG_FILE for patching. Skipping.${NC}\n"
+  fi
+
   printf "${YELLOW}Installing Python dependencies globally...${NC}\n"
+  pip3 install --upgrade pip
 
-  if [ -f "requirements-hivemind.txt" ]; then
-    printf "${YELLOW}Installing Python dependencies from requirements.txt...${NC}\n"
-    pip3 install -r requirements-hivemind.txt
+  if [ -f "requirements-gpu.txt" ]; then
+    printf "${YELLOW}Installing Python dependencies from requirements-gpu.txt...${NC}\n"
+    pip3 install -r requirements-gpu.txt
     printf "${GREEN}[✓] Python dependencies installed globally${NC}\n"
   else
     printf "${RED}[✗] requirements.txt not found. Unable to install Python dependencies.${NC}\n"
   fi
 
-  if [ -f "requirements_gpu.txt" ]; then
-    printf "${YELLOW}Installing Python dependencies from requirements.txt...${NC}\n"
-    pip3 install -r requirements_gpu.txt
-    printf "${GREEN}[✓] Python dependencies installed globally${NC}\n"
-  else
-    printf "${RED}[✗] requirements.txt not found. Unable to install Python dependencies.${NC}\n"
-  fi
-
-  if [ -f "requirements.txt" ]; then
-    printf "${YELLOW}Installing Python dependencies from requirements.txt...${NC}\n"
-    pip3 install -r requirements.txt
+  if [ -f "requirements-cpu.txt" ]; then
+    printf "${YELLOW}Installing Python dependencies from requirements-cpu.txt...${NC}\n"
+    pip3 install -r requirements-cpu.txt
     printf "${GREEN}[✓] Python dependencies installed globally${NC}\n"
   else
     printf "${RED}[✗] requirements.txt not found. Unable to install Python dependencies.${NC}\n"
@@ -153,6 +169,115 @@ PEER_MULTI_ADDRS=${PEER_MULTI_ADDRS:-$DEFAULT_PEER_MULTI_ADDRS}
 DEFAULT_HOST_MULTI_ADDRS="/ip4/0.0.0.0/tcp/38331"
 HOST_MULTI_ADDRS=${HOST_MULTI_ADDRS:-$DEFAULT_HOST_MULTI_ADDRS}
 
+# === NEW: Swarm and Config Selection ===
+SMALL_SWARM_CONTRACT="0x69C6e1D608ec64885E7b185d39b04B491a71768C"
+BIG_SWARM_CONTRACT="0x6947c6E196a48B77eFa9331EC1E3e45f3Ee5Fd58"
+OLD_SWARM_CONTRACT="0x2fC68a233EF9E9509f034DD551FF90A79a0B8F82"
+
+# Explanation for user choices
+cat <<EOT
+
+==================== RL-Swarm Swarm Selection ====================
+You can join one of three swarms:
+  [A] Math (GSM8K dataset)      - Standard math problems, suitable for most users.
+  [B] Math Hard (DAPO-Math 17K) - Harder math problems, requires more resources.
+  [O] Old Swarm                 - Legacy contract, for advanced users or compatibility.
+
+Choose 'A' for the regular Math swarm, 'B' for the Math Hard swarm, or 'O' for the Old Swarm.
+==================================================================
+EOT
+
+SWARM_DEFAULT="A"
+
+while true; do
+    read -p ">> Which swarm would you like to join (Math (A), Math Hard (B), or Old (O))? [A/b/o, default: $SWARM_DEFAULT] " ab
+    ab=${ab:-$SWARM_DEFAULT}
+    case $ab in
+        [Aa]*)  USE_SWARM="A" && break ;;
+        [Bb]*)  USE_SWARM="B" && break ;;
+        [Oo]*)  USE_SWARM="O" && break ;;
+        *)  echo ">>> Please answer A, B, or O." ;;
+    esac
+
+done
+if [ "$USE_SWARM" = "B" ]; then
+    SWARM_CONTRACT="$BIG_SWARM_CONTRACT"
+elif [ "$USE_SWARM" = "O" ]; then
+    SWARM_CONTRACT="$OLD_SWARM_CONTRACT"
+else
+    SWARM_CONTRACT="$SMALL_SWARM_CONTRACT"
+fi
+
+# Detect VRAM and set recommended default model size
+if command -v nvidia-smi &> /dev/null; then
+    VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -n1)
+    if [ "$VRAM" -ge 80000 ]; then
+        MODEL_DEFAULT=32
+    elif [ "$VRAM" -ge 48000 ]; then
+        MODEL_DEFAULT=7
+    elif [ "$VRAM" -ge 24000 ]; then
+        MODEL_DEFAULT=1.5
+    else
+        MODEL_DEFAULT=0.5
+    fi
+    echo "Detected GPU VRAM: ${VRAM}MB. Recommended default model size: ${MODEL_DEFAULT}B"
+else
+    MODEL_DEFAULT=0.5
+    echo "No NVIDIA GPU detected. Defaulting to smallest model size: 0.5B"
+fi
+
+# Update SMART_CONTRACT_ADDRESS in modal-login/.env if it exists
+ENV_FILE="/workspace/rl-swarm/modal-login/.env"
+if [ -f "$ENV_FILE" ]; then
+ sed -i "3s/.*/SMART_CONTRACT_ADDRESS=$SWARM_CONTRACT/" "$ENV_FILE"
+  printf "${GREEN}[✓] Updated SMART_CONTRACT_ADDRESS in modal-login/.env${NC}\n"
+else
+  printf "${YELLOW}[!] modal-login/.env not found, skipping SMART_CONTRACT_ADDRESS update${NC}\n"
+fi
+
+cat <<EOT
+
+==================== Model Size Selection ========================
+Choose the number of model parameters (in billions):
+  0.5  - Qwen 2.5 0.5B   (smallest, runs on most CPUs, 16GB+ RAM)
+  1.5  - Qwen 2.5 1.5B   (small, runs on most GPUs, 24GB+ VRAM)
+  7    - Qwen 2.5 7B     (medium, needs strong GPU, 48GB+ VRAM)
+  32   - Qwen 2.5 32B    (large, needs A100/H100 80GB GPU, 4-bit)
+  72   - Qwen 2.5 72B    (largest, needs A100/H100 80GB GPU, 4-bit)
+
+Smaller models require less memory and compute, but are less powerful.
+Larger models require more resources, but can achieve better results.
+==================================================================
+EOT
+
+while true; do
+    read -p ">> How many parameters (in billions)? [0.5, 1.5, 7, 32, 72] (default: $MODEL_DEFAULT) " pc
+    pc=${pc:-$MODEL_DEFAULT}
+    case $pc in
+        0.5 | 1.5 | 7 | 32 | 72) PARAM_B=$pc && break ;;
+        *)  echo ">>> Please answer in [0.5, 1.5, 7, 32, 72]." ;;
+    esac
+done
+
+# Set config and game based on choices
+if command -v nvidia-smi &> /dev/null || [ -d "/proc/driver/nvidia" ]; then
+    # GPU
+    case "$PARAM_B" in
+        32 | 72) CONFIG_PATH="$ROOT/hivemind_exp/configs/gpu/grpo-qwen-2.5-${PARAM_B}b-bnb-4bit-deepseek-r1.yaml" ;;
+        0.5 | 1.5 | 7) CONFIG_PATH="$ROOT/hivemind_exp/configs/gpu/grpo-qwen-2.5-${PARAM_B}b-deepseek-r1.yaml" ;;
+    esac
+    if [ "$USE_SWARM" = "B" ]; then
+        GAME="dapo"
+    else
+        GAME="gsm8k"
+    fi
+else
+    # CPU
+    CONFIG_PATH="$ROOT/hivemind_exp/configs/mac/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
+    GAME="gsm8k"
+fi
+# === END NEW ===
+
 CONNECT_TO_TESTNET="True"
 echo "Will connect to Testnet: $CONNECT_TO_TESTNET"
 
@@ -169,15 +294,7 @@ npm run dev --legacy-peer-deps > /dev/null 2>&1 &
 SERVER_PID=$!  # Store the process ID
 sleep 5
 
-echo -e "${GREEN}===========================================================${NC}"
 echo -e "${YELLOW}Modal login server is now running on port 3000${NC}"
-echo -e "${YELLOW}Access via your pod's URL if you need to create/update credentials.${NC}"
-echo -e "${YELLOW}If using Chrome, you may need to enable Web Crypto API:${NC}"
-echo -e "${GREEN}1.${NC} Go to chrome://flags/#unsafely-treat-insecure-origin-as-secure"
-echo -e "${GREEN}2.${NC} Add your pod's URL to treat as secure"
-echo -e "${GREEN}3.${NC} Relaunch Chrome and visit your pod's URL"
-echo -e "${GREEN}4.${NC} Verify by typing 'crypto.subtle' in the DevTools Console"
-echo -e "${GREEN}===========================================================${NC}"
 
 # Check if credential files already exist
 if [ -f "temp-data/userData.json" ] && [ -f "temp-data/userApiKey.json" ]; then
@@ -214,23 +331,36 @@ cd ..
 HUGGINGFACE_ACCESS_TOKEN="None"
 echo "Good luck in the swarm!"
 
-if [ -z "$CONFIG_PATH" ]; then
-    if command -v nvidia-smi &> /dev/null || [ -d "/proc/driver/nvidia" ]; then
-        echo "GPU detected, using GPU configuration"
-        CONFIG_PATH="$ROOT/hivemind_exp/configs/gpu/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
-    else
-        echo "No GPU detected, using CPU configuration"
-        CONFIG_PATH="$ROOT/hivemind_exp/configs/mac/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
-    fi
+echo "Using config: $CONFIG_PATH"
+
+# ... after SWARM_CONTRACT is set
+
+CACHE_FILE="/workspace/rl-swarm/modal-login/.last_swarm_choice"
+TEMPDATA_DIR="/workspace/rl-swarm/modal-login/temp-data"
+
+# Read previous choice if exists
+if [ -f "$CACHE_FILE" ]; then
+    LAST_CHOICE=$(cat "$CACHE_FILE")
+else
+    LAST_CHOICE=""
 fi
 
-echo "Using config: $CONFIG_PATH"
+# If the contract changed, clear temp-data
+if [ "$SWARM_CONTRACT" != "$LAST_CHOICE" ]; then
+    echo "Swarm contract changed. Clearing cached login data..."
+    rm -rf "$TEMPDATA_DIR"/*
+fi
+
+# Cache the current contract
+echo "$SWARM_CONTRACT" > "$CACHE_FILE"
 
 python -m hivemind_exp.gsm8k.train_single_gpu \
     --hf_token "$HUGGINGFACE_ACCESS_TOKEN" \
     --identity_path "$IDENTITY_PATH" \
     --modal_org_id "$ORG_ID" \
-    --config "$CONFIG_PATH"
+    --contract_address "$SWARM_CONTRACT" \
+    --config "$CONFIG_PATH" \
+    --game "$GAME"
 
 # Clean up only if SERVER_PID exists (login server was started)
 if [ ! -z "$SERVER_PID" ]; then
@@ -241,6 +371,7 @@ wait
 EOL
 
   chmod +x run.sh
+
   printf "${GREEN}[✓] Run script created${NC}\n"
   printf "${GREEN}[✓] Local installation preparation complete${NC}\n"
 }
@@ -252,14 +383,7 @@ main() {
 
   printf "\n${YELLOW}To run RL-Swarm with modal login:${NC}\n"
   printf "   ${BOLD}./run.sh${NC}\n\n"
-  
-  printf "${YELLOW}Note on Web Crypto API for Chrome:${NC}\n"
-  printf "   ${BOLD}1. Go to chrome://flags/#unsafely-treat-insecure-origin-as-secure${NC}\n"
-  printf "   ${BOLD}2. Add your pod's URL to treat as secure${NC}\n"
-  printf "   ${BOLD}3. Relaunch Chrome and access your pod's URL${NC}\n"
-  printf "   ${BOLD}4. Verify by typing 'crypto.subtle' in DevTools Console${NC}\n\n"
 
-  printf "${GREEN}${BOLD}Gensyn RL-Swarm local installation with identity management finished!${NC}\n"
   printf "${YELLOW}If you encounter issues, please refer to the official Gensyn Github: https://github.com/gensyn-ai/rl-swarm${NC}\n"
 }
 

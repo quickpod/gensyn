@@ -113,7 +113,11 @@ Click your **port 3000** link. It will open a new browser tab.
    ![image](https://github.com/user-attachments/assets/201b4424-9f74-4c9a-820f-5894aee9a579)  
    ![image](https://github.com/user-attachments/assets/b32e9b6d-3dfe-472d-9787-639fec3f88c9)
 
-5. You should see **Login Success**
+   If you are not receiving OTP email:
+   - OTP emails may be mistakenly filtered as spam. Look in your spam or junk folder for the OTP message
+   - Sometimes, there may be a delay in OTP delivery due to network or server issues. Wait a few minutes before requesting another OTP
+   - Double-check that the email address entered is correct and free of typos. An incorrect email will prevent delivery of the OTP
+6. You should see **Login Success**
 
    ![image](https://github.com/user-attachments/assets/52e7ef0f-7ef0-4ae4-9763-89470159bf8a)
 

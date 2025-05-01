@@ -103,14 +103,17 @@ Click your **port 3000** link. It will open a new browser tab.
 > [!NOTE]
 >  It may take 1–3 minutes. Just wait until you see this.
 
-1. Enter your email address  
+1. Click on Login
+   ![image](https://github.com/user-attachments/assets/c90a5e45-c1f3-439d-bfe2-80202d49f8d9)
+   
+3. Enter your email address  
    ![image](https://github.com/user-attachments/assets/f43ef0c7-a743-4dd3-822d-ab172598e460)
 
-2. Enter the token sent to your inbox  
+4. Enter the token sent to your inbox  
    ![image](https://github.com/user-attachments/assets/201b4424-9f74-4c9a-820f-5894aee9a579)  
    ![image](https://github.com/user-attachments/assets/b32e9b6d-3dfe-472d-9787-639fec3f88c9)
 
-3. You should see **Login Success**
+5. You should see **Login Success**
 
    ![image](https://github.com/user-attachments/assets/52e7ef0f-7ef0-4ae4-9763-89470159bf8a)
 

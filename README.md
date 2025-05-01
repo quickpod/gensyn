@@ -101,7 +101,7 @@ Click your **port 3000** link. It will open a new browser tab.
 ## 7. Authenticate
 
 > [!NOTE]
->  It may take 1–3 minutes. Refresh if you see a blank or unreachable page.
+>  It may take 1–3 minutes. Just wait until you see this.
 
 1. Enter your email address  
    ![image](https://github.com/user-attachments/assets/f43ef0c7-a743-4dd3-822d-ab172598e460)

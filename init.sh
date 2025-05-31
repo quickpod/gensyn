@@ -174,6 +174,35 @@ else
 fi
 
 ROOT=$PWD
+ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
+
+# Color definitions
+GREEN_TEXT="\033[32m"
+BLUE_TEXT="\033[34m"
+RESET_TEXT="\033[0m"
+
+echo_green() {
+    echo -e "$GREEN_TEXT$1$RESET_TEXT"
+}
+
+echo_blue() {
+    echo -e "$BLUE_TEXT$1$RESET_TEXT"
+}
+
+# Function to clean up the server process upon exit
+cleanup() {
+    echo_green ">> Shutting down trainer..."
+
+    # Remove modal credentials if they exist
+    rm -r $ROOT_DIR/modal-login/temp-data/*.json 2> /dev/null || true
+
+    # Kill all processes belonging to this script's process group
+    kill -- -$$ || true
+
+    exit 0
+}
+
+trap cleanup EXIT
 
 DEFAULT_PUB_MULTI_ADDRS=""
 PUB_MULTI_ADDRS=${PUB_MULTI_ADDRS:-$DEFAULT_PUB_MULTI_ADDRS}
@@ -379,9 +408,10 @@ python -m hivemind_exp.gsm8k.train_single_gpu \
 
 # Clean up only if SERVER_PID exists (login server was started)
 if [ ! -z "$SERVER_PID" ]; then
-    kill $SERVER_PID
+    kill $SERVER_PID 2>/dev/null || true
 fi
 
+# The cleanup function will handle the rest via the trap
 wait
 EOL
 

@@ -18,7 +18,11 @@
 
    ![msedge_uOQO96e36Z](https://github.com/user-attachments/assets/3c9aa89e-33e2-4b92-a92e-d2e15ea09679)
 
-4. Choose a machine:
+   Set Disk Space to at least `50`
+
+   ![image](https://github.com/user-attachments/assets/5d72d55e-b7c5-4fda-a976-7f3bcc6c59b7)
+
+5. Choose a machine:
    - **CPU:** 16GB+ RAM  
    - **GPU:** 16GB+ RAM (VRAM can be less or more than 24GB)
 
@@ -26,7 +30,7 @@
 
    ![image](https://github.com/user-attachments/assets/31ab3b50-1908-4425-b660-7072eb936b64)
 
-5. Click the orange **Connect to JupyterLab** button.
+6. Click the orange **Connect to JupyterLab** button.
 
    ![image](https://github.com/user-attachments/assets/4748f432-5be1-47e6-8cfb-a9d5aeb4720b)
 

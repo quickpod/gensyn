@@ -92,6 +92,17 @@ install_local() {
     printf "${RED}[✗] Could not find $RUNNER_FILE for patching. Skipping.${NC}\n"
   fi
 
+  # Patch grpo_runner.py to increase DHT startup timeout
+  printf "${YELLOW}Patching grpo_runner.py to increase DHT startup timeout...${NC}\n"
+  BASE_RUNNER_FILE="hivemind_exp/runner/grpo_runner.py"
+  if [ -f "$BASE_RUNNER_FILE" ]; then
+    # Use sed to replace the DHT initialization line with increased timeout
+    sed -i 's/startup_timeout=30/startup_timeout=180/' "$BASE_RUNNER_FILE"
+    printf "${GREEN}[✓] Successfully patched grpo_runner.py to increase DHT startup timeout to 180 seconds${NC}\n"
+  else
+    printf "${RED}[✗] Could not find $BASE_RUNNER_FILE for patching. Skipping.${NC}\n"
+  fi
+
   # Patch hivemind_grpo_trainer.py to remove only .save_model and .save_pretrained calls
   printf "${YELLOW}Patching hivemind_grpo_trainer.py to remove .save_model and .save_pretrained calls...${NC}\n"
   TRAINER_FILE="hivemind_exp/trainer/hivemind_grpo_trainer.py"
@@ -107,8 +118,43 @@ install_local() {
   printf "${YELLOW}Patching modal-login/config.ts to allow only email login...${NC}\n"
   MODAL_CONFIG_FILE="modal-login/config.ts"
   if [ -f "$MODAL_CONFIG_FILE" ]; then
-    awk '/const uiConfig: AlchemyAccountsUIConfig = {/{flag=1; print "const uiConfig: AlchemyAccountsUIConfig = {\n  illustrationStyle: \"outline\",\n  auth: {\n    sections: [\n      [{ type: \"email\" }],\n    ],\n    addPasskeyOnSignup: false,\n    //header: <img src=\"logo.png\"/>,\n  },\n};"; next} /};/ && flag{flag=0; next} !flag' "$MODAL_CONFIG_FILE" > "$MODAL_CONFIG_FILE.tmp" && mv "$MODAL_CONFIG_FILE.tmp" "$MODAL_CONFIG_FILE"
-    printf "${GREEN}[✓] Successfully patched modal-login/config.ts to allow only email login${NC}\n"
+    # Create a completely new config.ts that fixes the hydration issue
+    cat > "$MODAL_CONFIG_FILE" << 'CONFIG_EOF'
+import {
+  AlchemyAccountsUIConfig,
+  cookieStorage,
+  createConfig,
+} from "@account-kit/react";
+import { alchemy, sepolia } from "@account-kit/infra";
+import { QueryClient } from "@tanstack/react-query";
+
+const uiConfig: AlchemyAccountsUIConfig = {
+  illustrationStyle: "outline",
+  auth: {
+    sections: [
+      [{ type: "email" }],
+    ],
+    addPasskeyOnSignup: false,
+  },
+};
+
+export const config = createConfig(
+  {
+    transport: alchemy({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY! }),
+    chain: sepolia,
+    ssr: true,
+    storage: cookieStorage,
+    enablePopupOauth: false,
+    sessionConfig: {
+      expirationTimeMs: 1000 * 60 * 60 * 24 * 30, // 30 days
+    },
+  },
+  uiConfig,
+);
+
+export const queryClient = new QueryClient();
+CONFIG_EOF
+    printf "${GREEN}[✓] Successfully patched modal-login/config.ts to allow only email login and fix hydration${NC}\n"
   else
     printf "${RED}[✗] Could not find $MODAL_CONFIG_FILE for patching. Skipping.${NC}\n"
   fi
@@ -119,9 +165,22 @@ install_local() {
   if [ -f "requirements-gpu.txt" ]; then
     printf "${YELLOW}Installing Python dependencies from requirements-gpu.txt...${NC}\n"
     pip3 install -r requirements-gpu.txt
+    
+    # Install specific accelerate version after requirements
+    printf "${YELLOW}Installing accelerate==1.7.0 (overriding any version from requirements)...${NC}\n"
+    pip3 install accelerate==1.7.0
+    printf "${GREEN}[✓] accelerate==1.7.0 installed${NC}\n"
+    
+    # Add flash-attn installation for GPU setups
+    if command -v nvidia-smi &> /dev/null; then
+        printf "${YELLOW}Installing flash-attn for GPU acceleration...${NC}\n"
+        pip3 install flash-attn --no-build-isolation
+        printf "${GREEN}[✓] flash-attn installed${NC}\n"
+    fi
+    
     printf "${GREEN}[✓] Python dependencies installed globally${NC}\n"
   else
-    printf "${RED}[✗] requirements.txt not found. Unable to install Python dependencies.${NC}\n"
+    printf "${RED}[✗] requirements-gpu.txt not found. Unable to install Python dependencies.${NC}\n"
   fi
 
   if [ -f "requirements-cpu.txt" ]; then
@@ -142,10 +201,16 @@ install_local() {
     printf "${YELLOW}Installing Node.js dependencies for modal-login...${NC}\n"
     cd modal-login
     npm install --legacy-peer-deps
+    
+    # Build the server during setup
+    printf "${YELLOW}Building modal-login server (includes hydration fix)...${NC}\n"
+    npm run build
+    printf "${GREEN}[✓] modal-login server built${NC}\n"
+    
     # Create temp-data directory if it doesn't exist
     mkdir -p temp-data
     cd ..
-    printf "${GREEN}[✓] modal-login dependencies installed${NC}\n"
+    printf "${GREEN}[✓] modal-login dependencies installed and built${NC}\n"
   fi
 
   cd ..
@@ -332,9 +397,16 @@ nvm use 20.18.0
 
 # Always start modal_login server
 cd modal-login
-pkill -f next-server
+
+# Create logs directory
+mkdir -p ../logs
+
+pkill -f next-server 2>/dev/null || true
 echo "Starting modal-login server on port 3000..."
-npm run dev --legacy-peer-deps > /dev/null 2>&1 &
+
+# Server is already built during setup, just start it
+npm run start >> ../logs/npm.log 2>&1 &
+
 SERVER_PID=$!  # Store the process ID
 sleep 5
 

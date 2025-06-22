@@ -395,6 +395,26 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 nvm use 20.18.0
 
+# Check for swarm contract changes and clear cache if needed (BEFORE login)
+CACHE_FILE="/workspace/rl-swarm/modal-login/.last_swarm_choice"
+TEMPDATA_DIR="/workspace/rl-swarm/modal-login/temp-data"
+
+# Read previous choice if exists
+if [ -f "$CACHE_FILE" ]; then
+    LAST_CHOICE=$(cat "$CACHE_FILE")
+else
+    LAST_CHOICE=""
+fi
+
+# If the contract changed, clear temp-data BEFORE login
+if [ "$SWARM_CONTRACT" != "$LAST_CHOICE" ]; then
+    echo "Swarm contract changed. Clearing cached login data..."
+    rm -rf "$TEMPDATA_DIR"/*
+fi
+
+# Cache the current contract
+echo "$SWARM_CONTRACT" > "$CACHE_FILE"
+
 # Always start modal_login server
 cd modal-login
 
@@ -448,27 +468,6 @@ HUGGINGFACE_ACCESS_TOKEN="None"
 echo "Good luck in the swarm!"
 
 echo "Using config: $CONFIG_PATH"
-
-# ... after SWARM_CONTRACT is set
-
-CACHE_FILE="/workspace/rl-swarm/modal-login/.last_swarm_choice"
-TEMPDATA_DIR="/workspace/rl-swarm/modal-login/temp-data"
-
-# Read previous choice if exists
-if [ -f "$CACHE_FILE" ]; then
-    LAST_CHOICE=$(cat "$CACHE_FILE")
-else
-    LAST_CHOICE=""
-fi
-
-# If the contract changed, clear temp-data
-if [ "$SWARM_CONTRACT" != "$LAST_CHOICE" ]; then
-    echo "Swarm contract changed. Clearing cached login data..."
-    rm -rf "$TEMPDATA_DIR"/*
-fi
-
-# Cache the current contract
-echo "$SWARM_CONTRACT" > "$CACHE_FILE"
 
 python -m hivemind_exp.gsm8k.train_single_gpu \
     --hf_token "$HUGGINGFACE_ACCESS_TOKEN" \

@@ -12,6 +12,7 @@ fi
 
 # Configuration variables - modify these as needed
 CUDA_VERSION="cu121"  # CUDA version for PyTorch installation (e.g., cu121, cu126, etc.)
+TAG_VERSION="v0.4.4"  # RL-Swarm repository tag to clone
 
 # Text color and formatting definitions
 RED='\033[0;31m'
@@ -76,7 +77,7 @@ install_local() {
       printf "${YELLOW}Directory 'rl-swarm' already exists but is not a git repository. Skipping clone.${NC}\n"
     fi
   else
-    git clone https://github.com/gensyn-ai/rl-swarm.git
+    git clone --branch "$TAG_VERSION" https://github.com/gensyn-ai/rl-swarm.git
   fi
 
   cd rl-swarm || { printf "${RED}[✗] Failed to change directory to rl-swarm.${NC}\n"; exit 1; }

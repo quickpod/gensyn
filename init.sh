@@ -8,11 +8,12 @@ if [ "$PWD" != "/workspace" ]; then
 fi
 
 # Gensyn RL-Swarm node local installation automation script with identity management
-# Extension of the original gensyn.sh script to support identity management with modal login
+# Updated for GenRL-Swarm v0.5.1 architecture
 
 # Configuration variables - modify these as needed
-CUDA_VERSION="cu121"  # CUDA version for PyTorch installation (e.g., cu121, cu126, etc.)
-TAG_VERSION="v0.4.4"  # RL-Swarm repository tag to clone
+GENRL_SWARM_TAG="v0.1.1"  # GenRL-Swarm repository tag to clone
+SWARM_CONTRACT="0xFaD7C5e93f28257429569B854151A1B8DCD404c2"  # Current swarm contract
+TAG_VERSION="v0.5.1"  # RL-Swarm repository tag to clone
 
 # Text color and formatting definitions
 RED='\033[0;31m'
@@ -35,6 +36,7 @@ print_logo() {
   printf '╚═╝  ╚═╝ ╚══════╝       ╚══════╝  ╚══╝╚══╝  ╚═╝   ╚═╝  ╚═╝  ╚═╝ ╚═╝     ╚═╝\n'
   # End of ASCII Art
   printf "${NC}\n\n"
+  printf "${YELLOW}GenRL-Swarm ${GENRL_SWARM_TAG} - Reasoning Gym Edition${NC}\n\n"
 }
 
 # Function to install NVM and Node.js v20.18.0 or higher
@@ -65,55 +67,117 @@ install_node() {
 install_local() {
   printf "\n${BLUE}${BOLD}[3/3] Installing Gensyn RL-Swarm locally...${NC}\n"
 
+  # Configuration variables for installation
+  GENSYN_RESET_CONFIG=${GENSYN_RESET_CONFIG:-""}
+  CPU_ONLY=${CPU_ONLY:-""}
+
   printf "${YELLOW}Cloning Gensyn RL-Swarm repository...${NC}\n"
   if [ -d "rl-swarm" ]; then
     if [ -d "rl-swarm/.git" ]; then
       printf "${YELLOW}Directory 'rl-swarm' is a git repository. Cleaning and pulling latest changes...${NC}\n"
       cd rl-swarm
       git clean -fxd
-      git pull
+      git fetch --tags
+      git checkout "$TAG_VERSION"
+      git pull origin "$TAG_VERSION"
       cd ..
     else
       printf "${YELLOW}Directory 'rl-swarm' already exists but is not a git repository. Skipping clone.${NC}\n"
     fi
   else
-    git clone --branch "$TAG_VERSION" https://github.com/gensyn-ai/rl-swarm.git
+    git clone --depth=1 --branch "$TAG_VERSION" https://github.com/gensyn-ai/rl-swarm.git
   fi
 
   cd rl-swarm || { printf "${RED}[✗] Failed to change directory to rl-swarm.${NC}\n"; exit 1; }
 
-  # Patch testnet_grpo_runner.py to add startup_timeout parameter
-  printf "${YELLOW}Patching testnet_grpo_runner.py to add DHT startup timeout...${NC}\n"
-  RUNNER_FILE="hivemind_exp/runner/gensyn/testnet_grpo_runner.py"
-  if [ -f "$RUNNER_FILE" ]; then
-    # Use sed to replace the DHT initialization line with the patched version
-    sed -i 's/dht = hivemind\.DHT(start=True, \*\*self\._dht_kwargs(grpo_args))/dht = hivemind\.DHT(start=True, startup_timeout=100, \*\*self\._dht_kwargs(grpo_args))/' "$RUNNER_FILE"
-    printf "${GREEN}[✓] Successfully patched testnet_grpo_runner.py to add DHT startup timeout${NC}\n"
+  # Clone GenRL-Swarm repository
+  printf "${YELLOW}Cloning GenRL-Swarm repository...${NC}\n"
+  if [ ! -d "genrl-swarm" ]; then
+    git clone --depth=1 --branch "$GENRL_SWARM_TAG" https://github.com/gensyn-ai/genrl-swarm.git genrl-swarm
   else
-    printf "${RED}[✗] Could not find $RUNNER_FILE for patching. Skipping.${NC}\n"
+    # Check if we are on the correct tag
+    cd genrl-swarm
+    CURRENT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "unknown")
+    if [ "$CURRENT_TAG" != "$GENRL_SWARM_TAG" ]; then
+      printf "${YELLOW}Updating genrl-swarm to tag $GENRL_SWARM_TAG...${NC}\n"
+      git fetch --tags
+      git checkout "$GENRL_SWARM_TAG"
+      git pull origin "$GENRL_SWARM_TAG"
+    fi
+    cd ..
   fi
 
-  # Patch grpo_runner.py to increase DHT startup timeout
-  printf "${YELLOW}Patching grpo_runner.py to increase DHT startup timeout...${NC}\n"
-  BASE_RUNNER_FILE="hivemind_exp/runner/grpo_runner.py"
-  if [ -f "$BASE_RUNNER_FILE" ]; then
-    # Use sed to replace the DHT initialization line with increased timeout
-    sed -i 's/startup_timeout=30/startup_timeout=180/' "$BASE_RUNNER_FILE"
-    printf "${GREEN}[✓] Successfully patched grpo_runner.py to increase DHT startup timeout to 180 seconds${NC}\n"
+  # Install GenRL-Swarm
+  printf "${YELLOW}Installing GenRL-Swarm library...${NC}\n"
+  if [ -d "genrl-swarm" ]; then
+    cd genrl-swarm
+    pip3 install -e .[examples]
+    cd ..
+    printf "${GREEN}[✓] GenRL-Swarm library installed${NC}\n"
   else
-    printf "${RED}[✗] Could not find $BASE_RUNNER_FILE for patching. Skipping.${NC}\n"
+    printf "${RED}[✗] genrl-swarm directory not found. Unable to install GenRL.${NC}\n"
+    exit 1
   fi
 
-  # Patch hivemind_grpo_trainer.py to remove only .save_model and .save_pretrained calls
-  printf "${YELLOW}Patching hivemind_grpo_trainer.py to remove .save_model and .save_pretrained calls...${NC}\n"
-  TRAINER_FILE="hivemind_exp/trainer/hivemind_grpo_trainer.py"
-  if [ -f "$TRAINER_FILE" ]; then
-    sed -i '/\.save_model/d' "$TRAINER_FILE"
-    sed -i '/\.save_pretrained/d' "$TRAINER_FILE"
-    printf "${GREEN}[✓] Successfully patched hivemind_grpo_trainer.py to remove .save_model and .save_pretrained calls${NC}\n"
+  # Patch DHT startup timeout
+  printf "${YELLOW}Patching DHT startup timeout...${NC}\n"
+  
+  # Patch web API DHT timeout
+  WEB_DHT_FILE="web/api/global_dht.py"
+  if [ -f "$WEB_DHT_FILE" ]; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      # macOS version
+      sed -i '' 's/startup_timeout=60,/startup_timeout=120,/' "$WEB_DHT_FILE"
+    else
+      # Linux version
+      sed -i 's/startup_timeout=60,/startup_timeout=120,/' "$WEB_DHT_FILE"
+    fi
+    printf "${GREEN}[✓] Web API DHT startup timeout increased to 120 seconds${NC}\n"
   else
-    printf "${RED}[✗] Could not find $TRAINER_FILE for patching. Skipping.${NC}\n"
+    printf "${YELLOW}[!] Web API DHT file not found, skipping web DHT timeout patch${NC}\n"
   fi
+  
+  # Patch GenRL-Swarm DHT timeout
+  GENRL_DHT_FILE="genrl-swarm/src/genrl_swarm/communication/hivemind/hivemind_backend.py"
+  if [ -f "$GENRL_DHT_FILE" ]; then
+    # Add startup_timeout to both DHT initializations
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      # macOS version
+      sed -i '' 's/start=True,/start=True,\
+                startup_timeout=120,/' "$GENRL_DHT_FILE"
+    else
+      # Linux version
+      sed -i 's/start=True,/start=True,\
+                startup_timeout=120,/' "$GENRL_DHT_FILE"
+    fi
+    printf "${GREEN}[✓] GenRL-Swarm DHT startup timeout increased to 120 seconds${NC}\n"
+  else
+    printf "${YELLOW}[!] GenRL-Swarm DHT file not found, skipping GenRL DHT timeout patch${NC}\n"
+  fi
+
+  # Setup configuration directory and copy default config
+  printf "${YELLOW}Setting up configuration...${NC}\n"
+  if [ ! -d "configs" ]; then
+    mkdir configs
+  fi
+  
+  if [ -f "configs/rg-swarm.yaml" ]; then
+    # Use cmp -s for a silent comparison. If different, backup and copy.
+    if ! cmp -s "genrl-swarm/recipes/rgym/rg-swarm.yaml" "configs/rg-swarm.yaml"; then
+      printf "${YELLOW}Found differences in rg-swarm.yaml. Backing up existing config...${NC}\n"
+      mv "configs/rg-swarm.yaml" "configs/rg-swarm.yaml.bak"
+      cp "genrl-swarm/recipes/rgym/rg-swarm.yaml" "configs/rg-swarm.yaml"
+    fi
+  else
+    # If the config doesn't exist, just copy it.
+    cp "genrl-swarm/recipes/rgym/rg-swarm.yaml" "configs/rg-swarm.yaml"
+  fi
+  printf "${GREEN}[✓] Configuration setup complete${NC}\n"
+
+  # Install Python dependencies
+  printf "${YELLOW}Installing Python dependencies...${NC}\n"
+  pip3 install --upgrade pip
+  printf "${GREEN}[✓] Python dependencies updated${NC}\n"
 
   # Patch modal-login/config.ts to allow only email login
   printf "${YELLOW}Patching modal-login/config.ts to allow only email login...${NC}\n"
@@ -160,38 +224,6 @@ CONFIG_EOF
     printf "${RED}[✗] Could not find $MODAL_CONFIG_FILE for patching. Skipping.${NC}\n"
   fi
 
-  printf "${YELLOW}Installing Python dependencies globally...${NC}\n"
-  pip3 install --upgrade pip
-
-  if [ -f "requirements-gpu.txt" ]; then
-    printf "${YELLOW}Installing Python dependencies from requirements-gpu.txt...${NC}\n"
-    pip3 install -r requirements-gpu.txt
-    
-    # Install specific accelerate version after requirements
-    printf "${YELLOW}Installing accelerate==1.7.0 (overriding any version from requirements)...${NC}\n"
-    pip3 install accelerate==1.7.0
-    printf "${GREEN}[✓] accelerate==1.7.0 installed${NC}\n"
-    
-    # Add flash-attn installation for GPU setups
-    if command -v nvidia-smi &> /dev/null; then
-        printf "${YELLOW}Installing flash-attn for GPU acceleration...${NC}\n"
-        pip3 install flash-attn --no-build-isolation
-        printf "${GREEN}[✓] flash-attn installed${NC}\n"
-    fi
-    
-    printf "${GREEN}[✓] Python dependencies installed globally${NC}\n"
-  else
-    printf "${RED}[✗] requirements-gpu.txt not found. Unable to install Python dependencies.${NC}\n"
-  fi
-
-  if [ -f "requirements-cpu.txt" ]; then
-    printf "${YELLOW}Installing Python dependencies from requirements-cpu.txt...${NC}\n"
-    pip3 install -r requirements-cpu.txt
-    printf "${GREEN}[✓] Python dependencies installed globally${NC}\n"
-  else
-    printf "${RED}[✗] requirements.txt not found. Unable to install Python dependencies.${NC}\n"
-  fi
-
   # Check if modal-login directory exists and setup
   if [ ! -d "modal-login" ]; then
     printf "${RED}[✗] modal-login directory not found. Unable to complete setup.${NC}\n"
@@ -201,11 +233,17 @@ CONFIG_EOF
   else
     printf "${YELLOW}Installing Node.js dependencies for modal-login...${NC}\n"
     cd modal-login
-    npm install --legacy-peer-deps
+    
+    # Install yarn if not available
+    if ! command -v yarn > /dev/null 2>&1; then
+      npm install -g yarn
+    fi
+    
+    yarn install --immutable
     
     # Build the server during setup
-    printf "${YELLOW}Building modal-login server (includes hydration fix)...${NC}\n"
-    npm run build
+    printf "${YELLOW}Building modal-login server...${NC}\n"
+    yarn build
     printf "${GREEN}[✓] modal-login server built${NC}\n"
     
     # Create temp-data directory if it doesn't exist
@@ -220,31 +258,28 @@ CONFIG_EOF
   cat > run.sh << 'EOL'
 #!/bin/bash
 
-# RL-Swarm execution script with modal login
+# RL-Swarm execution script with GenRL-Swarm v0.5.1
 
-export PUB_MULTI_ADDRS
-export PEER_MULTI_ADDRS
-export HOST_MULTI_ADDRS
-export IDENTITY_PATH
-export CONNECT_TO_TESTNET
-export ORG_ID
-export HF_HUB_DOWNLOAD_TIMEOUT=120
-
-IDENTITY_PATH="$PWD/swarm.pem"
-
-if [ -d "rl-swarm" ]; then
-    cd rl-swarm
-else
-    echo "Error: rl-swarm directory not found. Please run init.sh first."
-    exit 1
-fi
+set -euo pipefail
 
 ROOT=$PWD
-ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
 
-# Color definitions
+export IDENTITY_PATH
+export CONNECT_TO_TESTNET=true
+export ORG_ID
+export HF_HUB_DOWNLOAD_TIMEOUT=120  # 2 minutes
+export SWARM_CONTRACT="0xFaD7C5e93f28257429569B854151A1B8DCD404c2"
+export HUGGINGFACE_ACCESS_TOKEN="None"
+
+# Path to an RSA private key. If this path does not exist, a new key pair will be created.
+DEFAULT_IDENTITY_PATH="$ROOT"/swarm.pem
+IDENTITY_PATH=${IDENTITY_PATH:-$DEFAULT_IDENTITY_PATH}
+
+ORG_ID=${ORG_ID:-""}
+
 GREEN_TEXT="\033[32m"
 BLUE_TEXT="\033[34m"
+RED_TEXT="\033[31m"
 RESET_TEXT="\033[0m"
 
 echo_green() {
@@ -255,12 +290,18 @@ echo_blue() {
     echo -e "$BLUE_TEXT$1$RESET_TEXT"
 }
 
+echo_red() {
+    echo -e "$RED_TEXT$1$RESET_TEXT"
+}
+
+ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
+
 # Function to clean up the server process upon exit
 cleanup() {
     echo_green ">> Shutting down trainer..."
 
     # Remove modal credentials if they exist
-    rm -r $ROOT_DIR/modal-login/temp-data/*.json 2> /dev/null || true
+    rm -r $ROOT_DIR/rl-swarm/modal-login/temp-data/*.json 2> /dev/null || true
 
     # Kill all processes belonging to this script's process group
     kill -- -$$ || true
@@ -268,185 +309,90 @@ cleanup() {
     exit 0
 }
 
+errnotify() {
+    echo_red ">> An error was detected while running rl-swarm. See $ROOT/rl-swarm/logs for full logs."
+}
+
 trap cleanup EXIT
+trap errnotify ERR
 
-DEFAULT_PUB_MULTI_ADDRS=""
-PUB_MULTI_ADDRS=${PUB_MULTI_ADDRS:-$DEFAULT_PUB_MULTI_ADDRS}
-
-DEFAULT_PEER_MULTI_ADDRS="/ip4/38.101.215.13/tcp/30002/p2p/QmQ2gEXoPJg6iMBSUFWGzAabS2VhnzuS782Y637hGjfsRJ"
-PEER_MULTI_ADDRS=${PEER_MULTI_ADDRS:-$DEFAULT_PEER_MULTI_ADDRS}
-
-DEFAULT_HOST_MULTI_ADDRS="/ip4/0.0.0.0/tcp/38331"
-HOST_MULTI_ADDRS=${HOST_MULTI_ADDRS:-$DEFAULT_HOST_MULTI_ADDRS}
-
-# === NEW: Swarm and Config Selection ===
-SMALL_SWARM_CONTRACT="0x69C6e1D608ec64885E7b185d39b04B491a71768C"
-BIG_SWARM_CONTRACT="0x6947c6E196a48B77eFa9331EC1E3e45f3Ee5Fd58"
-OLD_SWARM_CONTRACT="0x2fC68a233EF9E9509f034DD551FF90A79a0B8F82"
-
-# Explanation for user choices
-cat <<EOT
-
-==================== RL-Swarm Swarm Selection ====================
-You can join one of three swarms:
-  [A] Math (GSM8K dataset)      - Standard math problems, suitable for most users.
-  [B] Math Hard (DAPO-Math 17K) - Harder math problems, requires more resources.
-  [O] Old Swarm                 - Legacy contract, for advanced users or compatibility.
-
-Choose 'A' for the regular Math swarm, 'B' for the Math Hard swarm, or 'O' for the Old Swarm.
-==================================================================
-EOT
-
-SWARM_DEFAULT="A"
-
-while true; do
-    read -p ">> Which swarm would you like to join (Math (A), Math Hard (B), or Old (O))? [A/b/o, default: $SWARM_DEFAULT] " ab
-    ab=${ab:-$SWARM_DEFAULT}
-    case $ab in
-        [Aa]*)  USE_SWARM="A" && break ;;
-        [Bb]*)  USE_SWARM="B" && break ;;
-        [Oo]*)  USE_SWARM="O" && break ;;
-        *)  echo ">>> Please answer A, B, or O." ;;
-    esac
-
-done
-if [ "$USE_SWARM" = "B" ]; then
-    SWARM_CONTRACT="$BIG_SWARM_CONTRACT"
-elif [ "$USE_SWARM" = "O" ]; then
-    SWARM_CONTRACT="$OLD_SWARM_CONTRACT"
+if [ -d "rl-swarm" ]; then
+    cd rl-swarm
 else
-    SWARM_CONTRACT="$SMALL_SWARM_CONTRACT"
+    echo "Error: rl-swarm directory not found. Please run init.sh first."
+    exit 1
 fi
 
-# Detect VRAM and set recommended default model size
-if command -v nvidia-smi &> /dev/null; then
-    VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -n1)
-    if [ "$VRAM" -ge 80000 ]; then
-        MODEL_DEFAULT=32
-    elif [ "$VRAM" -ge 48000 ]; then
-        MODEL_DEFAULT=7
-    elif [ "$VRAM" -ge 24000 ]; then
-        MODEL_DEFAULT=1.5
-    else
-        MODEL_DEFAULT=0.5
+echo -e "\033[38;5;224m"
+cat << "EOF"
+    ██████  ██            ███████ ██     ██  █████  ██████  ███    ███
+    ██   ██ ██            ██      ██     ██ ██   ██ ██   ██ ████  ████
+    ██████  ██      █████ ███████ ██  █  ██ ███████ ██████  ██ ████ ██
+    ██   ██ ██                 ██ ██ ███ ██ ██   ██ ██   ██ ██  ██  ██
+    ██   ██ ███████       ███████  ███ ███  ██   ██ ██   ██ ██      ██
+
+    From Gensyn - GenRL-Swarm v0.5.1
+
+EOF
+
+# Create logs directory if it doesn't exist
+mkdir -p "$ROOT/logs"
+
+# Verify installation was completed
+if [ ! -d "genrl-swarm" ]; then
+    echo_red "Error: GenRL-Swarm not found. Please run init.sh first."
+    exit 1
+fi
+
+if [ ! -f "configs/rg-swarm.yaml" ]; then
+    echo_red "Error: Configuration not found. Please run init.sh first."
+    exit 1
+fi
+
+if [ "$CONNECT_TO_TESTNET" = true ]; then
+    # Run modal_login server.
+    echo "Please login to create an Ethereum Server Wallet"
+    cd modal-login
+
+    # Load NVM and Node.js
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm use 20.18.0
+
+    # Update contract address in .env file
+    ENV_FILE="$ROOT/rl-swarm/modal-login/.env"
+    if [ -f "$ENV_FILE" ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS version
+            sed -i '' "3s/.*/SMART_CONTRACT_ADDRESS=$SWARM_CONTRACT/" "$ENV_FILE"
+        else
+            # Linux version
+            sed -i "3s/.*/SMART_CONTRACT_ADDRESS=$SWARM_CONTRACT/" "$ENV_FILE"
+        fi
     fi
-    echo "Detected GPU VRAM: ${VRAM}MB. Recommended default model size: ${MODEL_DEFAULT}B"
-else
-    MODEL_DEFAULT=0.5
-    echo "No NVIDIA GPU detected. Defaulting to smallest model size: 0.5B"
-fi
 
-# Update SMART_CONTRACT_ADDRESS in modal-login/.env if it exists
-ENV_FILE="/workspace/rl-swarm/modal-login/.env"
-if [ -f "$ENV_FILE" ]; then
- sed -i "3s/.*/SMART_CONTRACT_ADDRESS=$SWARM_CONTRACT/" "$ENV_FILE"
-  printf "${GREEN}[✓] Updated SMART_CONTRACT_ADDRESS in modal-login/.env${NC}\n"
-else
-  printf "${YELLOW}[!] modal-login/.env not found, skipping SMART_CONTRACT_ADDRESS update${NC}\n"
-fi
+    # Start the modal login server
+    yarn start >> "$ROOT/logs/yarn.log" 2>&1 &
+    SERVER_PID=$!
+    echo "Started server process: $SERVER_PID"
+    sleep 5
 
-cat <<EOT
-
-==================== Model Size Selection ========================
-Choose the number of model parameters (in billions):
-  0.5  - Qwen 2.5 0.5B   (smallest, runs on most CPUs, 16GB+ RAM)
-  1.5  - Qwen 2.5 1.5B   (small, runs on most GPUs, 24GB+ VRAM)
-  7    - Qwen 2.5 7B     (medium, needs strong GPU, 48GB+ VRAM)
-  32   - Qwen 2.5 32B    (large, needs A100/H100 80GB GPU, 4-bit)
-  72   - Qwen 2.5 72B    (largest, needs A100/H100 80GB GPU, 4-bit)
-
-Smaller models require less memory and compute, but are less powerful.
-Larger models require more resources, but can achieve better results.
-==================================================================
-EOT
-
-while true; do
-    read -p ">> How many parameters (in billions)? [0.5, 1.5, 7, 32, 72] (default: $MODEL_DEFAULT) " pc
-    pc=${pc:-$MODEL_DEFAULT}
-    case $pc in
-        0.5 | 1.5 | 7 | 32 | 72) PARAM_B=$pc && break ;;
-        *)  echo ">>> Please answer in [0.5, 1.5, 7, 32, 72]." ;;
-    esac
-done
-
-# Set config and game based on choices
-if command -v nvidia-smi &> /dev/null || [ -d "/proc/driver/nvidia" ]; then
-    # GPU
-    case "$PARAM_B" in
-        32 | 72) CONFIG_PATH="$ROOT/hivemind_exp/configs/gpu/grpo-qwen-2.5-${PARAM_B}b-bnb-4bit-deepseek-r1.yaml" ;;
-        0.5 | 1.5 | 7) CONFIG_PATH="$ROOT/hivemind_exp/configs/gpu/grpo-qwen-2.5-${PARAM_B}b-deepseek-r1.yaml" ;;
-    esac
-    if [ "$USE_SWARM" = "B" ]; then
-        GAME="dapo"
+    # Try to open the URL in the default browser
+    if open http://localhost:3000 2> /dev/null; then
+        echo_green ">> Successfully opened http://localhost:3000 in your default browser."
     else
-        GAME="gsm8k"
+        echo ">> Failed to open http://localhost:3000. Please open it manually."
     fi
-else
-    # CPU
-    CONFIG_PATH="$ROOT/hivemind_exp/configs/mac/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
-    GAME="gsm8k"
-fi
-# === END NEW ===
 
-CONNECT_TO_TESTNET="True"
-echo "Will connect to Testnet: $CONNECT_TO_TESTNET"
+    cd ..
 
-# Load NVM and Node.js v18 or higher
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-nvm use 20.18.0
-
-# Check for swarm contract changes and clear cache if needed (BEFORE login)
-CACHE_FILE="/workspace/rl-swarm/modal-login/.last_swarm_choice"
-TEMPDATA_DIR="/workspace/rl-swarm/modal-login/temp-data"
-
-# Read previous choice if exists
-if [ -f "$CACHE_FILE" ]; then
-    LAST_CHOICE=$(cat "$CACHE_FILE")
-else
-    LAST_CHOICE=""
-fi
-
-# If the contract changed, clear temp-data BEFORE login
-if [ "$SWARM_CONTRACT" != "$LAST_CHOICE" ]; then
-    echo "Swarm contract changed. Clearing cached login data..."
-    rm -rf "$TEMPDATA_DIR"/*
-fi
-
-# Cache the current contract
-echo "$SWARM_CONTRACT" > "$CACHE_FILE"
-
-# Always start modal_login server
-cd modal-login
-
-# Create logs directory
-mkdir -p ../logs
-
-pkill -f next-server 2>/dev/null || true
-echo "Starting modal-login server on port 3000..."
-
-# Server is already built during setup, just start it
-npm run start >> ../logs/npm.log 2>&1 &
-
-SERVER_PID=$!  # Store the process ID
-sleep 5
-
-echo -e "${YELLOW}Modal login server is now running on port 3000${NC}"
-
-# Check if credential files already exist
-if [ -f "temp-data/userData.json" ] && [ -f "temp-data/userApiKey.json" ]; then
-    echo "Found existing login credentials. Using them without waiting for login process."
-    ORG_ID=$(awk 'BEGIN { FS = "\"" } !/^[ \t]*[{}]/ { print $(NF - 1); exit }' temp-data/userData.json)
-    echo "Your ORG_ID is set to: $ORG_ID"
-else
-    echo "No existing credentials found. Please complete the login process in your browser."
-    echo "Waiting for modal userData.json to be created..."
-    while [ ! -f "temp-data/userData.json" ]; do
-        sleep 5  # Wait for 5 seconds before checking again
+    echo_green ">> Waiting for modal userData.json to be created..."
+    while [ ! -f "modal-login/temp-data/userData.json" ]; do
+        sleep 5
     done
     echo "Found userData.json. Proceeding..."
 
-    ORG_ID=$(awk 'BEGIN { FS = "\"" } !/^[ \t]*[{}]/ { print $(NF - 1); exit }' temp-data/userData.json)
+    ORG_ID=$(awk 'BEGIN { FS = "\"" } !/^[ \t]*[{}]/ { print $(NF - 1); exit }' modal-login/temp-data/userData.json)
     echo "Your ORG_ID is set to: $ORG_ID"
 
     # Wait until the API key is activated by the client
@@ -463,28 +409,19 @@ else
     done
 fi
 
-cd ..
+echo_green ">> Hugging Face Hub uploads disabled (models will not be pushed)"
 
-HUGGINGFACE_ACCESS_TOKEN="None"
-echo "Good luck in the swarm!"
+echo_green ">> Using default model from config"
 
-echo "Using config: $CONFIG_PATH"
+echo_green ">> Good luck in the swarm!"
+echo_blue ">> And remember to star the repo on GitHub! --> https://github.com/gensyn-ai/rl-swarm"
 
-python -m hivemind_exp.gsm8k.train_single_gpu \
-    --hf_token "$HUGGINGFACE_ACCESS_TOKEN" \
-    --identity_path "$IDENTITY_PATH" \
-    --modal_org_id "$ORG_ID" \
-    --contract_address "$SWARM_CONTRACT" \
-    --config "$CONFIG_PATH" \
-    --game "$GAME"
+# Launch the GenRL-Swarm runner
+python "$ROOT/rl-swarm/genrl-swarm/src/genrl_swarm/runner/swarm_launcher.py" \
+    --config-path "$ROOT/rl-swarm/configs" \
+    --config-name "rg-swarm.yaml"
 
-# Clean up only if SERVER_PID exists (login server was started)
-if [ ! -z "$SERVER_PID" ]; then
-    kill $SERVER_PID 2>/dev/null || true
-fi
-
-# The cleanup function will handle the rest via the trap
-wait
+wait  # Keep script running until Ctrl+C
 EOL
 
   chmod +x run.sh
@@ -498,8 +435,14 @@ main() {
   install_node
   install_local
 
-  printf "\n${YELLOW}To run RL-Swarm with modal login:${NC}\n"
+  printf "\n${YELLOW}To run RL-Swarm with GenRL-Swarm v0.5.1:${NC}\n"
   printf "   ${BOLD}./run.sh${NC}\n\n"
+
+  printf "${YELLOW}Important Notes:${NC}\n"
+  printf "• This version uses the new GenRL-Swarm architecture\n"
+  printf "• Models are auto-assigned based on your hardware capabilities\n" 
+  printf "• The system uses reasoning-gym tasks instead of math problems\n"
+  printf "• Configuration is simplified with a single rg-swarm.yaml file\n\n"
 
   printf "${YELLOW}If you encounter issues, please refer to the official Gensyn Github: https://github.com/gensyn-ai/rl-swarm${NC}\n"
 }

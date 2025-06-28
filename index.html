@@ -221,12 +221,10 @@
             <input type="text" id="peerId" placeholder="Enter your Peer ID">
         </div>
         <div class="form-group">
-            <label for="contractSelect">Select Math Contract</label>
-            <select id="contractSelect">
-                <option value="0x69C6e1D608ec64885E7b185d39b04B491a71768C" selected>Math A - Small Swarm</option>
-                <option value="0x6947c6E196a48B77eFa9331EC1E3e45f3Ee5Fd58">Math Hard B - Big Swarm</option>
-                <option value="0x2fC68a233EF9E9509f034DD551FF90A79a0B8F82">Old Swarm</option>
-            </select>
+            <label>Swarm Contract</label>
+            <div style="padding: 0.7em 0.9em; border: 1px solid var(--border-color); border-radius: var(--border-radius); background-color: #f8f9fa; color: var(--text-color); font-size: 0.95em;">
+                GenRL-Swarm v0.5.1 - Reasoning Gym
+            </div>
         </div>
         <button id="checkStatus">Check Status</button>
 
@@ -244,15 +242,15 @@
                 <dt>EOA Address</dt>
                 <dd id="rEoa"></dd>
 
-                <dt>Total Wins</dt>
-                <dd id="rWins"></dd>
+                <dt>Score</dt>
+                <dd id="rScore"></dd>
+
+                <dt>Rewards</dt>
+                <dd id="rRewards"></dd>
             </dl>
             <dl>
                 <dt>Current Round</dt>
                 <dd id="rRound"></dd>
-
-                <dt>Current Stage</dt>
-                <dd id="rStage"></dd>
 
                 <dt>Total Trained Models</dt>
                 <dd id="rTotalModels"></dd>
@@ -329,21 +327,17 @@
         ];
 
         const RPC_URL = "https://gensyn-testnet.g.alchemy.com/public";
-        const CONTRACT_ADDRESSES = {
-            SMALL: "0x69C6e1D608ec64885E7b185d39b04B491a71768C",
-            BIG: "0x6947c6E196a48B77eFa9331EC1E3e45f3Ee5Fd58"
-        };
+        const CONTRACT_ADDRESS = "0xFaD7C5e93f28257429569B854151A1B8DCD404c2";
         const ABI = [
             "function getEoa(string[] peerIds) view returns (address[])",
-            "function getTotalWins(string peerId) view returns (uint256)",
-            "function currentStage() view returns (uint256)",
+            "function getVoterVoteCount(string peerId) view returns (uint256)",
+            "function getTotalRewards(string[] peerIds) view returns (uint256[])",
             "function currentRound() view returns (uint256)",
             "function uniqueVoters() view returns (uint256)"
         ];
 
         const $ = id => document.getElementById(id);
         const peerInput = $('peerId');
-        const contractSelect = $('contractSelect');
         const checkBtn = $('checkStatus');
         const resultsDiv = $('results');
         const errorDiv = $('error');
@@ -382,13 +376,8 @@
 
         const fetchData = async () => {
             const peerId = peerInput.value.trim();
-            const contractAddress = contractSelect.value;
             if (!peerId) {
                 displayError('Please enter a Peer ID.');
-                return;
-            }
-            if (!contractAddress) {
-                displayError('Please select a Math contract.');
                 return;
             }
 
@@ -398,13 +387,13 @@
 
             try {
                 const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-                const contract = new ethers.Contract(contractAddress, ABI, provider);
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
 
-                const [eoaRes, wins, round, stage, totalModels] = await Promise.all([
+                const [eoaRes, score, rewardsRes, round, totalModels] = await Promise.all([
                     contract.getEoa([peerId]),
-                    contract.getTotalWins(peerId),
+                    contract.getVoterVoteCount(peerId),
+                    contract.getTotalRewards([peerId]),
                     contract.currentRound(),
-                    contract.currentStage(),
                     contract.uniqueVoters()
                 ]);
 
@@ -414,9 +403,9 @@
                 $('rAnimalName').textContent = animalName;
                 $('rPeerId').textContent = peerId;
                 $('rEoa').textContent = eoaRes[0];
-                $('rWins').textContent = wins.toString();
+                $('rScore').textContent = score.toString();
+                $('rRewards').textContent = rewardsRes[0].toString();
                 $('rRound').textContent = round.toString();
-                $('rStage').textContent = stage.toString();
                 $('rTotalModels').textContent = totalModels.toString();
 
                 // Update explorer link
@@ -442,11 +431,6 @@
 
         checkBtn.addEventListener('click', fetchData);
         peerInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                fetchData();
-            }
-        });
-        contractSelect.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 fetchData();
             }

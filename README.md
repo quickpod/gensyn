@@ -62,11 +62,11 @@ In the terminal, paste and run:
 curl -s https://quickpod.github.io/gensyn/init.sh | bash
 ```
 
-![image](https://github.com/user-attachments/assets/0ff3da71-15d5-4fed-9a0c-20e7e31c0391)
+![image](https://github.com/user-attachments/assets/30797129-2c6b-4ade-86e8-894f865f01a3)
 
 Wait until installation is complete.
 
-![image](https://github.com/user-attachments/assets/c39f44c6-1194-4ba3-bf5d-45fc13b52367)
+![image](https://github.com/user-attachments/assets/5b794f87-1952-40c2-bd68-f44c2b11a95f)
 
 ---
 
@@ -124,7 +124,7 @@ Click your **port 3000** link. It will open a new browser tab.
 
 If running is succesful you will see these, locate your **ORG ID** and **Peer ID** and remember it.
 
-![image](https://github.com/user-attachments/assets/73251815-5d41-4d5b-b810-9f1892542bdc)
+![image](https://github.com/user-attachments/assets/253b5b04-1bcd-4870-b0b1-067ffaa44095)
 
 Go to: [https://quickpod.github.io/gensyn](https://quickpod.github.io/gensyn)  
 

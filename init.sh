@@ -111,7 +111,7 @@ install_local() {
   printf "${YELLOW}Installing GenRL-Swarm library...${NC}\n"
   if [ -d "genrl-swarm" ]; then
     cd genrl-swarm
-    pip3 install -e .[examples]
+    pip3 install .[examples]
     cd ..
     printf "${GREEN}[✓] GenRL-Swarm library installed${NC}\n"
   else
@@ -153,6 +153,24 @@ install_local() {
     printf "${GREEN}[✓] GenRL-Swarm DHT startup timeout increased to 120 seconds${NC}\n"
   else
     printf "${YELLOW}[!] GenRL-Swarm DHT file not found, skipping GenRL DHT timeout patch${NC}\n"
+  fi
+
+  # Patch model saving to disable persistence
+  printf "${YELLOW}Patching model saving to disable persistence...${NC}\n"
+  
+  # Patch rgym trainer save method
+  RGYM_TRAINER_FILE="genrl-swarm/src/genrl_swarm/examples/rgym/trainer.py"
+  if [ -f "$RGYM_TRAINER_FILE" ]; then
+    # Linux version - disable model saving
+    sed -i '/def save(self, save_dir: str) -> None:/,/^    def / {
+      /def save(self, save_dir: str) -> None:/!{
+        /^    def /!d
+      }
+    }' "$RGYM_TRAINER_FILE"
+    sed -i '/def save(self, save_dir: str) -> None:/a\
+      """Save method disabled - no model persistence needed for swarm participation."""\
+      pass' "$RGYM_TRAINER_FILE"
+    printf "${GREEN}[✓] RGYM trainer model saving disabled${NC}\n"
   fi
 
   # Setup configuration directory and copy default config

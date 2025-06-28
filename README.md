@@ -1,5 +1,5 @@
 # 🐝 Quick Start: Gensyn RL-Swarm on QuickPod  
-**Last updated:** June 22, 2025
+**Last updated:** June 28, 2025
 
 ---
 
@@ -78,19 +78,7 @@ In the terminal, run:
 ./run.sh
 ```
 
-> [!WARNING]
-> When prompted to choose between A or B, just press **Enter** unless you know what to pick. Remember your choice for later.
-
-![image](https://github.com/user-attachments/assets/530afc90-efe3-4f19-9745-352729035c6c)  
-
-Just press Enter unless you know about these options.
-
-![image](https://github.com/user-attachments/assets/32f28377-a814-4b91-befc-8192b2e8659b)
-
-If you see a screen like this, continue to Steps 6–7.  
-If not, skip to Step 8.
-
-![image](https://github.com/user-attachments/assets/cf7b3eb8-a4aa-442d-9d2c-2c3bc66e0452)
+![image](https://github.com/user-attachments/assets/e731d668-c2b4-47f4-ae42-707d5e081a6a)
 
 ---
 
@@ -139,16 +127,11 @@ If running is succesful you will see these, locate your **ORG ID** and **Peer ID
 ![image](https://github.com/user-attachments/assets/73251815-5d41-4d5b-b810-9f1892542bdc)
 
 Go to: [https://quickpod.github.io/gensyn](https://quickpod.github.io/gensyn)  
-Paste your **Peer ID**, and select **A or B** (based on Step 5).
 
 > [!NOTE]
-> Gensyn now uses a new swarm system (A/B). Old swarms are deprecated. New swarms will show 0 wins at start
+> Gensyn now uses a new swarm system called reasoning-gym instead of math problems. Old swarms are deprecated. New swarms will show 0 score at start.
 
-![image](https://github.com/user-attachments/assets/2569b712-0304-4833-8a0c-8af11ac6b7e8)
-
-Example of old swarm (not recommended anymore):
-
-![image](https://github.com/user-attachments/assets/742ecf75-3586-4680-bcb2-b379825dc25a)
+![image](https://github.com/user-attachments/assets/1affca1a-5977-4377-80f2-f9bd6f670862)
 
 ---
 

@@ -111,9 +111,13 @@ install_local() {
   printf "${YELLOW}Installing GenRL-Swarm library...${NC}\n"
   if [ -d "genrl-swarm" ]; then
     cd genrl-swarm
-    pip3 install .[examples]
+    
+    # Upgrade pip first to avoid conflicts later
+    printf "${YELLOW}Upgrading pip...${NC}\n"
+    pip3 install --upgrade pip
+    
     cd ..
-    printf "${GREEN}[✓] GenRL-Swarm library installed${NC}\n"
+    printf "${GREEN}[✓] GenRL-Swarm directory ready for installation${NC}\n"
   else
     printf "${RED}[✗] genrl-swarm directory not found. Unable to install GenRL.${NC}\n"
     exit 1
@@ -191,11 +195,6 @@ install_local() {
     cp "genrl-swarm/recipes/rgym/rg-swarm.yaml" "configs/rg-swarm.yaml"
   fi
   printf "${GREEN}[✓] Configuration setup complete${NC}\n"
-
-  # Install Python dependencies
-  printf "${YELLOW}Installing Python dependencies...${NC}\n"
-  pip3 install --upgrade pip
-  printf "${GREEN}[✓] Python dependencies updated${NC}\n"
 
   # Patch modal-login/config.ts to allow only email login
   printf "${YELLOW}Patching modal-login/config.ts to allow only email login...${NC}\n"
@@ -446,6 +445,18 @@ EOL
 
   printf "${GREEN}[✓] Run script created${NC}\n"
   printf "${GREEN}[✓] Local installation preparation complete${NC}\n"
+
+  # Install GenRL-Swarm library after all patches are applied
+  printf "${YELLOW}Installing GenRL-Swarm library (final step)...${NC}\n"
+  if [ -d "rl-swarm/genrl-swarm" ]; then
+    cd rl-swarm/genrl-swarm
+    pip3 install -e .[examples]
+    cd ../..
+    printf "${GREEN}[✓] GenRL-Swarm library installed successfully${NC}\n"
+  else
+    printf "${RED}[✗] GenRL-Swarm directory not found at rl-swarm/genrl-swarm${NC}\n"
+    exit 1
+  fi
 }
 
 main() {

@@ -13,7 +13,7 @@ fi
 # Configuration variables - modify these as needed
 GENRL_SWARM_TAG="v0.1.1"  # GenRL-Swarm repository tag to clone
 SWARM_CONTRACT="0xFaD7C5e93f28257429569B854151A1B8DCD404c2"  # Current swarm contract
-TAG_VERSION="v0.5.1"  # RL-Swarm repository tag to clone
+TAG_VERSION="v0.5.2"  # RL-Swarm repository tag to clone
 
 # Text color and formatting definitions
 RED='\033[0;31m'
@@ -457,6 +457,16 @@ EOL
     printf "${RED}[✗] GenRL-Swarm directory not found at rl-swarm/genrl-swarm${NC}\n"
     exit 1
   fi
+
+  # Patch hivemind p2p_daemon.py startup timeout
+  printf "${YELLOW}Patching hivemind p2p_daemon startup timeout...${NC}\n"
+  HIVEMIND_P2P_FILE="/usr/local/lib/python3.10/dist-packages/hivemind/p2p/p2p_daemon.py"
+  if [ -f "$HIVEMIND_P2P_FILE" ]; then
+    sed -i 's/startup_timeout: float = *15/startup_timeout: float = 120/' "$HIVEMIND_P2P_FILE"
+    printf "${GREEN}[✓] Hivemind p2p_daemon startup timeout increased to 120 seconds${NC}\n"
+  else
+    printf "${YELLOW}[!] Hivemind p2p_daemon file not found at $HIVEMIND_P2P_FILE, skipping patch${NC}\n"
+  fi
 }
 
 main() {
@@ -464,7 +474,7 @@ main() {
   install_node
   install_local
 
-  printf "\n${YELLOW}To run RL-Swarm with GenRL-Swarm v0.5.1:${NC}\n"
+  printf "\n${YELLOW}To run RL-Swarm with GenRL-Swarm ${TAG_VERSION}:${NC}\n"
   printf "   ${BOLD}./run.sh${NC}\n\n"
 
   printf "${YELLOW}Important Notes:${NC}\n"

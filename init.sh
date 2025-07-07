@@ -348,7 +348,7 @@ cat << "EOF"
     ██   ██ ██                 ██ ██ ███ ██ ██   ██ ██   ██ ██  ██  ██
     ██   ██ ███████       ███████  ███ ███  ██   ██ ██   ██ ██      ██
 
-    From Gensyn - GenRL-Swarm v0.5.1
+    From Gensyn
 
 EOF
 
@@ -428,7 +428,14 @@ fi
 
 echo_green ">> Hugging Face Hub uploads disabled (models will not be pushed)"
 
-echo_green ">> Using default model from config"
+# Check if model name was provided as argument
+if [ $# -gt 0 ]; then
+    MODEL_NAME="$1"
+    export MODEL_NAME
+    echo_green ">> Using model: $MODEL_NAME"
+else
+    echo_green ">> Using default model from config"
+fi
 
 echo_green ">> Good luck in the swarm!"
 echo_blue ">> And remember to star the repo on GitHub! --> https://github.com/gensyn-ai/rl-swarm"

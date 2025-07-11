@@ -468,13 +468,14 @@ EOL
 
   # Patch hivemind p2p_daemon.py startup timeout
   printf "${YELLOW}Patching hivemind p2p_daemon startup timeout...${NC}\n"
-  HIVEMIND_P2P_FILE="/usr/local/lib/python3.10/dist-packages/hivemind/p2p/p2p_daemon.py"
-  if [ -f "$HIVEMIND_P2P_FILE" ]; then
-    sed -i 's/startup_timeout: float = *15/startup_timeout: float = 120/' "$HIVEMIND_P2P_FILE"
-    printf "${GREEN}[✓] Hivemind p2p_daemon startup timeout increased to 120 seconds${NC}\n"
-  else
-    printf "${YELLOW}[!] Hivemind p2p_daemon file not found at $HIVEMIND_P2P_FILE, skipping patch${NC}\n"
-  fi
+  printf "${YELLOW}[!] Hivemind p2p_daemon patching temporarily disabled to avoid startup issues${NC}\n"
+  # HIVEMIND_P2P_FILE="/usr/local/lib/python3.10/dist-packages/hivemind/p2p/p2p_daemon.py"
+  # if [ -f "$HIVEMIND_P2P_FILE" ]; then
+  #   sed -i 's/startup_timeout: float = *15/startup_timeout: float = 120/' "$HIVEMIND_P2P_FILE"
+  #   printf "${GREEN}[✓] Hivemind p2p_daemon startup timeout increased to 120 seconds${NC}\n"
+  # else
+  #   printf "${YELLOW}[!] Hivemind p2p_daemon file not found at $HIVEMIND_P2P_FILE, skipping patch${NC}\n"
+  # fi
 }
 
 main() {

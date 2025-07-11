@@ -11,9 +11,9 @@ fi
 # Updated for GenRL-Swarm v0.5.1 architecture
 
 # Configuration variables - modify these as needed
-GENRL_SWARM_TAG="v0.1.1"  # GenRL-Swarm repository tag to clone
+GENRL_SWARM_TAG="v0.5.3"  # GenRL-Swarm repository tag to clone
 SWARM_CONTRACT="0xFaD7C5e93f28257429569B854151A1B8DCD404c2"  # Current swarm contract
-TAG_VERSION="v0.5.2"  # RL-Swarm repository tag to clone
+TAG_VERSION="v0.1.4"  # RL-Swarm repository tag to clone
 
 # Text color and formatting definitions
 RED='\033[0;31m'
@@ -72,34 +72,34 @@ install_local() {
   CPU_ONLY=${CPU_ONLY:-""}
 
   printf "${YELLOW}Cloning Gensyn RL-Swarm repository...${NC}\n"
-  if [ -d "rl-swarm" ]; then
-    if [ -d "rl-swarm/.git" ]; then
-      printf "${YELLOW}Directory 'rl-swarm' is a git repository. Cleaning and pulling latest changes...${NC}\n"
-      cd rl-swarm
+  if [ -d "genrl" ]; then
+    if [ -d "genrl/.git" ]; then
+      printf "${YELLOW}Directory 'genrl' is a git repository. Cleaning and pulling latest changes...${NC}\n"
+      cd genrl
       git clean -fxd
       git fetch --tags
       git checkout "$TAG_VERSION"
       git pull origin "$TAG_VERSION"
       cd ..
     else
-      printf "${YELLOW}Directory 'rl-swarm' already exists but is not a git repository. Skipping clone.${NC}\n"
+      printf "${YELLOW}Directory 'genrl' already exists but is not a git repository. Skipping clone.${NC}\n"
     fi
   else
-    git clone --depth=1 --branch "$TAG_VERSION" https://github.com/gensyn-ai/rl-swarm.git
+    git clone --depth=1 --branch "$TAG_VERSION" https://github.com/gensyn-ai/genrl
   fi
 
-  cd rl-swarm || { printf "${RED}[✗] Failed to change directory to rl-swarm.${NC}\n"; exit 1; }
+  cd genrl || { printf "${RED}[✗] Failed to change directory to genrl.${NC}\n"; exit 1; }
 
   # Clone GenRL-Swarm repository
   printf "${YELLOW}Cloning GenRL-Swarm repository...${NC}\n"
-  if [ ! -d "genrl-swarm" ]; then
-    git clone --depth=1 --branch "$GENRL_SWARM_TAG" https://github.com/gensyn-ai/genrl-swarm.git genrl-swarm
+  if [ ! -d "rl-swarm" ]; then
+    git clone --depth=1 --branch "$GENRL_SWARM_TAG" https://github.com/gensyn-ai/rl-swarm.git rl-swarm
   else
     # Check if we are on the correct tag
-    cd genrl-swarm
+    cd rl-swarm
     CURRENT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "unknown")
     if [ "$CURRENT_TAG" != "$GENRL_SWARM_TAG" ]; then
-      printf "${YELLOW}Updating genrl-swarm to tag $GENRL_SWARM_TAG...${NC}\n"
+      printf "${YELLOW}Updating rl-swarm to tag $GENRL_SWARM_TAG...${NC}\n"
       git fetch --tags
       git checkout "$GENRL_SWARM_TAG"
       git pull origin "$GENRL_SWARM_TAG"
@@ -109,8 +109,8 @@ install_local() {
 
   # Install GenRL-Swarm
   printf "${YELLOW}Installing GenRL-Swarm library...${NC}\n"
-  if [ -d "genrl-swarm" ]; then
-    cd genrl-swarm
+  if [ -d "rl-swarm" ]; then
+    cd rl-swarm
     
     # Upgrade pip first to avoid conflicts later
     printf "${YELLOW}Upgrading pip...${NC}\n"
@@ -119,7 +119,7 @@ install_local() {
     cd ..
     printf "${GREEN}[✓] GenRL-Swarm directory ready for installation${NC}\n"
   else
-    printf "${RED}[✗] genrl-swarm directory not found. Unable to install GenRL.${NC}\n"
+    printf "${RED}[✗] rl-swarm directory not found. Unable to install GenRL.${NC}\n"
     exit 1
   fi
 
@@ -142,7 +142,7 @@ install_local() {
   fi
   
   # Patch GenRL-Swarm DHT timeout
-  GENRL_DHT_FILE="genrl-swarm/src/genrl_swarm/communication/hivemind/hivemind_backend.py"
+  GENRL_DHT_FILE="rl-swarm/src/genrl_swarm/communication/hivemind/hivemind_backend.py"
   if [ -f "$GENRL_DHT_FILE" ]; then
     # Add startup_timeout to both DHT initializations
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -163,7 +163,7 @@ install_local() {
   printf "${YELLOW}Patching model saving to disable persistence...${NC}\n"
   
   # Patch rgym trainer save method
-  RGYM_TRAINER_FILE="genrl-swarm/src/genrl_swarm/examples/rgym/trainer.py"
+  RGYM_TRAINER_FILE="rl-swarm/src/genrl_swarm/examples/rgym/trainer.py"
   if [ -f "$RGYM_TRAINER_FILE" ]; then
     # Linux version - disable model saving
     sed -i '/def save(self, save_dir: str) -> None:/,/^    def / {
@@ -185,20 +185,20 @@ install_local() {
   
   if [ -f "configs/rg-swarm.yaml" ]; then
     # Use cmp -s for a silent comparison. If different, backup and copy.
-    if ! cmp -s "genrl-swarm/recipes/rgym/rg-swarm.yaml" "configs/rg-swarm.yaml"; then
+    if ! cmp -s "rl-swarm/rgym_exp/config/rg-swarm.yaml" "configs/rg-swarm.yaml"; then
       printf "${YELLOW}Found differences in rg-swarm.yaml. Backing up existing config...${NC}\n"
       mv "configs/rg-swarm.yaml" "configs/rg-swarm.yaml.bak"
-      cp "genrl-swarm/recipes/rgym/rg-swarm.yaml" "configs/rg-swarm.yaml"
+      cp "rl-swarm/rgym_exp/config/rg-swarm.yaml" "configs/rg-swarm.yaml"
     fi
   else
     # If the config doesn't exist, just copy it.
-    cp "genrl-swarm/recipes/rgym/rg-swarm.yaml" "configs/rg-swarm.yaml"
+    cp "rl-swarm/rgym_exp/config/rg-swarm.yaml" "configs/rg-swarm.yaml"
   fi
   printf "${GREEN}[✓] Configuration setup complete${NC}\n"
 
   # Patch modal-login/config.ts to allow only email login
   printf "${YELLOW}Patching modal-login/config.ts to allow only email login...${NC}\n"
-  MODAL_CONFIG_FILE="modal-login/config.ts"
+  MODAL_CONFIG_FILE="rl-swarm/modal-login/config.ts"
   if [ -f "$MODAL_CONFIG_FILE" ]; then
     # Create a completely new config.ts that fixes the hydration issue
     cat > "$MODAL_CONFIG_FILE" << 'CONFIG_EOF'
@@ -242,14 +242,14 @@ CONFIG_EOF
   fi
 
   # Check if modal-login directory exists and setup
-  if [ ! -d "modal-login" ]; then
+  if [ ! -d "rl-swarm/modal-login" ]; then
     printf "${RED}[✗] modal-login directory not found. Unable to complete setup.${NC}\n"
-    printf "${YELLOW}Make sure you have the correct rl-swarm repository with modal-login support.${NC}\n"
+    printf "${YELLOW}Make sure you have the correct genrl repository with modal-login support.${NC}\n"
     cd ..
     exit 1
   else
     printf "${YELLOW}Installing Node.js dependencies for modal-login...${NC}\n"
-    cd modal-login
+    cd rl-swarm/modal-login
     
     # Install yarn if not available
     if ! command -v yarn > /dev/null 2>&1; then
@@ -265,7 +265,7 @@ CONFIG_EOF
     
     # Create temp-data directory if it doesn't exist
     mkdir -p temp-data
-    cd ..
+    cd ../..
     printf "${GREEN}[✓] modal-login dependencies installed and built${NC}\n"
   fi
 
@@ -318,7 +318,7 @@ cleanup() {
     echo_green ">> Shutting down trainer..."
 
     # Remove modal credentials if they exist
-    rm -r $ROOT_DIR/rl-swarm/modal-login/temp-data/*.json 2> /dev/null || true
+    rm -r $ROOT_DIR/genrl/rl-swarm/modal-login/temp-data/*.json 2> /dev/null || true
 
     # Kill all processes belonging to this script's process group
     kill -- -$$ || true
@@ -327,16 +327,16 @@ cleanup() {
 }
 
 errnotify() {
-    echo_red ">> An error was detected while running rl-swarm. See $ROOT/rl-swarm/logs for full logs."
+    echo_red ">> An error was detected while running rl-swarm. See $ROOT/genrl/logs for full logs."
 }
 
 trap cleanup EXIT
 trap errnotify ERR
 
-if [ -d "rl-swarm" ]; then
-    cd rl-swarm
+if [ -d "genrl" ]; then
+    cd genrl
 else
-    echo "Error: rl-swarm directory not found. Please run init.sh first."
+    echo "Error: genrl directory not found. Please run init.sh first."
     exit 1
 fi
 
@@ -356,7 +356,7 @@ EOF
 mkdir -p "$ROOT/logs"
 
 # Verify installation was completed
-if [ ! -d "genrl-swarm" ]; then
+if [ ! -d "rl-swarm" ]; then
     echo_red "Error: GenRL-Swarm not found. Please run init.sh first."
     exit 1
 fi
@@ -369,7 +369,7 @@ fi
 if [ "$CONNECT_TO_TESTNET" = true ]; then
     # Run modal_login server.
     echo "Please login to create an Ethereum Server Wallet"
-    cd modal-login
+    cd rl-swarm/modal-login
 
     # Load NVM and Node.js
     export NVM_DIR="$HOME/.nvm"
@@ -377,7 +377,7 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
     nvm use 20.18.0
 
     # Update contract address in .env file
-    ENV_FILE="$ROOT/rl-swarm/modal-login/.env"
+    ENV_FILE="$ROOT/genrl/rl-swarm/modal-login/.env"
     if [ -f "$ENV_FILE" ]; then
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS version
@@ -401,15 +401,15 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
         echo ">> Failed to open http://localhost:3000. Please open it manually."
     fi
 
-    cd ..
+    cd ../..
 
     echo_green ">> Waiting for modal userData.json to be created..."
-    while [ ! -f "modal-login/temp-data/userData.json" ]; do
+    while [ ! -f "rl-swarm/modal-login/temp-data/userData.json" ]; do
         sleep 5
     done
     echo "Found userData.json. Proceeding..."
 
-    ORG_ID=$(awk 'BEGIN { FS = "\"" } !/^[ \t]*[{}]/ { print $(NF - 1); exit }' modal-login/temp-data/userData.json)
+    ORG_ID=$(awk 'BEGIN { FS = "\"" } !/^[ \t]*[{}]/ { print $(NF - 1); exit }' rl-swarm/modal-login/temp-data/userData.json)
     echo "Your ORG_ID is set to: $ORG_ID"
 
     # Wait until the API key is activated by the client
@@ -441,8 +441,8 @@ echo_green ">> Good luck in the swarm!"
 echo_blue ">> And remember to star the repo on GitHub! --> https://github.com/gensyn-ai/rl-swarm"
 
 # Launch the GenRL-Swarm runner
-python "$ROOT/rl-swarm/genrl-swarm/src/genrl_swarm/runner/swarm_launcher.py" \
-    --config-path "$ROOT/rl-swarm/configs" \
+python "$ROOT/genrl/rl-swarm/src/genrl_swarm/runner/swarm_launcher.py" \
+    --config-path "$ROOT/genrl/configs" \
     --config-name "rg-swarm.yaml"
 
 wait  # Keep script running until Ctrl+C
@@ -455,13 +455,13 @@ EOL
 
   # Install GenRL-Swarm library after all patches are applied
   printf "${YELLOW}Installing GenRL-Swarm library (final step)...${NC}\n"
-  if [ -d "rl-swarm/genrl-swarm" ]; then
-    cd rl-swarm/genrl-swarm
+  if [ -d "genrl/rl-swarm" ]; then
+    cd genrl/rl-swarm
     pip3 install -e .[examples]
     cd ../..
     printf "${GREEN}[✓] GenRL-Swarm library installed successfully${NC}\n"
   else
-    printf "${RED}[✗] GenRL-Swarm directory not found at rl-swarm/genrl-swarm${NC}\n"
+    printf "${RED}[✗] GenRL-Swarm directory not found at genrl/rl-swarm${NC}\n"
     exit 1
   fi
 

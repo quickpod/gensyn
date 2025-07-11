@@ -441,8 +441,9 @@ echo_green ">> Good luck in the swarm!"
 echo_blue ">> And remember to star the repo on GitHub! --> https://github.com/gensyn-ai/rl-swarm"
 
 # Launch the GenRL-Swarm runner
-python "$ROOT/genrl/rl-swarm/src/genrl_swarm/runner/swarm_launcher.py" \
-    --config-path "$ROOT/genrl/configs" \
+cd rl-swarm
+python -m rgym_exp.runner.swarm_launcher \
+    --config-path "$ROOT/genrl/rl-swarm/rgym_exp/config" \
     --config-name "rg-swarm.yaml"
 
 wait  # Keep script running until Ctrl+C

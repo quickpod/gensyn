@@ -467,10 +467,20 @@ EOL
     exit 1
   fi
 
-  # Reinstall hivemind to ensure clean p2pd binary
-  printf "${YELLOW}Reinstalling hivemind to ensure clean p2pd binary...${NC}\n"
-  pip3 install --force-reinstall hivemind
-  printf "${GREEN}[✓] Hivemind reinstalled successfully${NC}\n"
+  # Reinstall hivemind to ensure correct Linux p2pd binary
+  printf "${YELLOW}Reinstalling hivemind from source to ensure correct Linux p2pd binary...${NC}\n"
+  pip3 uninstall -y hivemind
+  
+  # Clone and install hivemind from source
+  if [ -d "hivemind" ]; then
+    rm -rf hivemind
+  fi
+  git clone https://github.com/learning-at-home/hivemind
+  cd hivemind
+  pip3 install -e . --no-use-pep517
+  cd ..
+  printf "${GREEN}[✓] Hivemind installed from source with correct Linux binary${NC}\n"
+
 
   # Patch hivemind p2p_daemon.py startup timeout
   printf "${YELLOW}Patching hivemind p2p_daemon startup timeout...${NC}\n"

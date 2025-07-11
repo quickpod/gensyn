@@ -455,13 +455,13 @@ EOL
 
   # Install GenRL-Swarm library after all patches are applied
   printf "${YELLOW}Installing GenRL-Swarm library (final step)...${NC}\n"
-  if [ -d "genrl/rl-swarm" ]; then
-    cd genrl/rl-swarm
+  if [ -d "genrl" ]; then
+    cd genrl
     pip3 install -e .[examples]
-    cd ../..
+    cd ..
     printf "${GREEN}[✓] GenRL-Swarm library installed successfully${NC}\n"
   else
-    printf "${RED}[✗] GenRL-Swarm directory not found at genrl/rl-swarm${NC}\n"
+    printf "${RED}[✗] GenRL directory not found at genrl${NC}\n"
     exit 1
   fi
 

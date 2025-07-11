@@ -142,22 +142,23 @@ install_local() {
   fi
   
   # Patch GenRL-Swarm DHT timeout
-  GENRL_DHT_FILE="rl-swarm/src/genrl_swarm/communication/hivemind/hivemind_backend.py"
-  if [ -f "$GENRL_DHT_FILE" ]; then
-    # Add startup_timeout to both DHT initializations
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-      # macOS version
-      sed -i '' 's/start=True,/start=True,\
-                startup_timeout=120,/' "$GENRL_DHT_FILE"
-    else
-      # Linux version
-      sed -i 's/start=True,/start=True,\
-                startup_timeout=120,/' "$GENRL_DHT_FILE"
-    fi
-    printf "${GREEN}[✓] GenRL-Swarm DHT startup timeout increased to 120 seconds${NC}\n"
-  else
-    printf "${YELLOW}[!] GenRL-Swarm DHT file not found, skipping GenRL DHT timeout patch${NC}\n"
-  fi
+  printf "${YELLOW}[!] GenRL-Swarm DHT timeout patching temporarily disabled to avoid daemon startup issues${NC}\n"
+  # GENRL_DHT_FILE="rl-swarm/src/genrl_swarm/communication/hivemind/hivemind_backend.py"
+  # if [ -f "$GENRL_DHT_FILE" ]; then
+  #   # Add startup_timeout to both DHT initializations
+  #   if [[ "$OSTYPE" == "darwin"* ]]; then
+  #     # macOS version
+  #     sed -i '' 's/start=True,/start=True,\
+  #               startup_timeout=120,/' "$GENRL_DHT_FILE"
+  #   else
+  #     # Linux version
+  #     sed -i 's/start=True,/start=True,\
+  #               startup_timeout=120,/' "$GENRL_DHT_FILE"
+  #   fi
+  #   printf "${GREEN}[✓] GenRL-Swarm DHT startup timeout increased to 120 seconds${NC}\n"
+  # else
+  #   printf "${YELLOW}[!] GenRL-Swarm DHT file not found, skipping GenRL DHT timeout patch${NC}\n"
+  # fi
 
   # Patch model saving to disable persistence
   printf "${YELLOW}Patching model saving to disable persistence...${NC}\n"
@@ -465,6 +466,11 @@ EOL
     printf "${RED}[✗] GenRL directory not found at genrl${NC}\n"
     exit 1
   fi
+
+  # Reinstall hivemind to ensure clean p2pd binary
+  printf "${YELLOW}Reinstalling hivemind to ensure clean p2pd binary...${NC}\n"
+  pip3 install --force-reinstall hivemind
+  printf "${GREEN}[✓] Hivemind reinstalled successfully${NC}\n"
 
   # Patch hivemind p2p_daemon.py startup timeout
   printf "${YELLOW}Patching hivemind p2p_daemon startup timeout...${NC}\n"

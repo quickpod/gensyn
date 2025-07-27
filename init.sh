@@ -11,7 +11,7 @@ fi
 # Updated for GenRL-Swarm v0.5.1 architecture
 
 # Configuration variables - modify these as needed
-GENRL_SWARM_TAG="v0.5.5"  # GenRL-Swarm repository tag to clone
+GENRL_SWARM_TAG="v0.5.8"  # GenRL-Swarm repository tag to clone
 SWARM_CONTRACT="0xFaD7C5e93f28257429569B854151A1B8DCD404c2"  # Current swarm contract
 TAG_VERSION="v0.1.4"  # RL-Swarm repository tag to clone
 

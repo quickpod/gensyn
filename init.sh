@@ -477,6 +477,7 @@ EOL
   fi
   git clone https://github.com/learning-at-home/hivemind
   cd hivemind
+  git checkout 4d5c41495be082490ea44cce4e9dd58f9926bb4e
   pip3 install -e . --no-use-pep517
   cd ..
   printf "${GREEN}[✓] Hivemind installed from source with correct Linux binary${NC}\n"

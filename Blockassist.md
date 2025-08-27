@@ -10,6 +10,7 @@
 3. Find a suitable GPU pod. We recommend at least a 3060 for stable performance.
 > [!Warning]
 > Low-end GPUs will experience poor performance in both playing Minecraft and encoding the video stream.
+
 > [!Note]
 > Try to find a machine as close to your physical geolocation as possible. This will greatly affect latency and perceived perfomance on the machine.
 

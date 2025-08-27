@@ -30,6 +30,7 @@
    `git clone https://github.com/gensyn-ai/blockassist.git && cd blockassist && ./setup.sh && curl -fsSL https://pyenv.run | bash`
 > [!Important]
 > If prompted, enter the same password that you used to access the VNC viewer to authenticate the terminal.
+
 > [!Note]
 > If you can't paste from your local clipboard, check your browser settings and enable permission for the Kasm webpage to access the clipboard.
 > <img width="587" height="566" alt="image" src="https://github.com/user-attachments/assets/c49e04f8-39aa-44af-9405-52fc6e6137ff" />

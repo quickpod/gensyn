@@ -56,17 +56,13 @@ Inside JupyterLab, click the **Terminal** icon on the left.
 
 ## 4. Install Gensyn Node
 
-In the terminal, paste and run:
-
+Paste and run the following.
 ```bash
-curl -s https://quickpod.github.io/gensyn/init.sh | bash
+git clone https://github.com/gensyn-ai/rl-swarm && apt update && apt install -y sudo
 ```
 
-![image](https://github.com/user-attachments/assets/30797129-2c6b-4ade-86e8-894f865f01a3)
-
-Wait until installation is complete.
-
-![image](https://github.com/user-attachments/assets/5b794f87-1952-40c2-bd68-f44c2b11a95f)
+If you are prompted to overwrite the sudoers file, keep the current one by simply pressing ENTER.
+![Keep the existing sudeors file](images/keep-sudoers.png)
 
 ---
 
@@ -75,7 +71,9 @@ Wait until installation is complete.
 In the terminal, run:
 
 ```bash
-./run.sh
+python3 -m venv .venv
+source .venv/bin/activate
+cd /workspace/rl-swarm && ./run_rl_swarm.sh
 ```
 
 ![image](https://github.com/user-attachments/assets/e731d668-c2b4-47f4-ae42-707d5e081a6a)
@@ -112,6 +110,15 @@ Click your **port 3000** link. It will open a new browser tab.
 6. You should see **Login Success**
 
    ![image](https://github.com/user-attachments/assets/52e7ef0f-7ef0-4ae4-9763-89470159bf8a)
+
+7. Back in the terminal, it will ask if you would like to upload your results to Huggingface. If you would, type "y", hit enter and then paste your Access Token and enter. 
+![alt text](images/hf-prompt.png)
+
+8. When prompted with which model to use, just click enter.
+![alt text](images/hf-model.png)
+
+9. It will also ask if you would like to participate in the AI Prediction Market (Judge) functionality. If so, type "y" and press enter.
+![alt text](images/judge-prompt.png)
 
 ---
 

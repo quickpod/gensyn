@@ -75,6 +75,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 cd /workspace/rl-swarm && ./run_rl_swarm.sh
 ```
+If it gets stuck before the login page prompt loads, press CTRL+C, then run ./run_rl_swarm.sh again.
 
 ![image](https://github.com/user-attachments/assets/e731d668-c2b4-47f4-ae42-707d5e081a6a)
 

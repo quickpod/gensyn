@@ -6,9 +6,9 @@
 ## 1. Create Your Pod
 
 1. Go to [QuickPod Templates](https://console.quickpod.io/templates)  
-2. Find **`Jupyter Lab CUDA 12.6`**, click **Clone**, and name it (e.g., `Gensyn 12.6`)
+2. Find **`Jupyter Lab CUDA 12.9`**, click **Clone**, and name it (e.g., `Gensyn 12.9`)
 
-   ![image](https://github.com/user-attachments/assets/bb3b85bf-9eee-41d3-95a5-40d8fbc95878)
+   <img width="2161" height="1065" alt="image" src="https://github.com/user-attachments/assets/6a61585e-287a-4177-8700-68d997cbcc81" />
 
 3. In the Docker settings, add:
    ```

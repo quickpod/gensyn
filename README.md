@@ -64,6 +64,14 @@ git clone https://github.com/gensyn-ai/rl-swarm && apt update && apt install -y 
 If you are prompted to overwrite the sudoers file, keep the current one by simply pressing ENTER.
 ![Keep the existing sudeors file](images/keep-sudoers.png)
 
+Then, run these commands to update `npm` and `node` to the latest version.
+```bash
+sudo apt-get install -y curl
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+sudo apt-get install -y nsolid
+nsolid -v
+npm install --force -g node@latest
+```
 ---
 
 ## 5. Start the Node
